@@ -193,6 +193,9 @@ class BaseBenchmarkHarness:
         return full_benchmark_name
 
     def get_full_log_dir(self):
+        if os.environ.get("MLPERF_LOADGEN_LOGS_DIR"):
+            return os.environ.get("MLPERF_LOADGEN_LOGS_DIR")
+
         return os.path.join(self.args["log_dir"], self.get_system_name(), self._get_submission_benchmark_name(),
                             self.scenario.valstr())
 
@@ -357,10 +360,12 @@ class BaseBenchmarkHarness:
         if self.benchmark in [Benchmark.LLAMA2] and self.scenario in [Scenario.Offline]:
             loadgen_query_keys.append("result_samples_per_second")
 
-        results = from_loadgen_by_keys(os.path.join(self.args["log_dir"],
+        '''results = from_loadgen_by_keys(os.path.join(self.args["log_dir"],
                                                     self.get_system_name(),
                                                     self._get_submission_benchmark_name(),
                                                     self.scenario.valstr()),
+        '''
+        results = from_loadgen_by_keys(os.path.join(self.get_full_log_dir()),
                                        loadgen_query_keys)
         test_mode = flag_dict.get("test_mode", "PerformanceOnly")
         satisfies_query_constraint = float(results.get(query_metric_key, "0.0")) \

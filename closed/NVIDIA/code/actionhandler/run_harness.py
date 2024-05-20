@@ -127,14 +127,15 @@ class RunHarnessHandler(GenerateConfFilesHandler):
             append (bool): If True, adds result_data to the existing metadata (if any). (Default: False)
         """
         summary_file = os.path.join(self.harness.get_full_log_dir(), HARNESS_METADATA_FILE)
-        if append:
+        if append and os.path.exists(summary_file):
             with open(summary_file, 'r') as f:
                 md = json.load(f)
                 md.update(result_data)
         else:
             md = result_data
-        with open(summary_file, "w") as f:
-            json.dump(md, f, indent=4, sort_keys=True)
+        if not os.environ.get('MLPERF_LOADGEN_LOGS_DIR'):
+            with open(summary_file, "w") as f:
+                json.dump(md, f, indent=4, sort_keys=True)
 
     def _get_result_string(self, result_data):
         if result_data["test_mode"] == "AccuracyOnly":

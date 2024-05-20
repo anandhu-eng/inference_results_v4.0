@@ -311,12 +311,14 @@ class RN50GraphSurgeon(ONNXNetwork):
             # Replace FC layer with 1x1 conv
             fc_impl = self.add_conv
 
-        policy = [self.add_squeeze,
+        policy = []
+        if not str(os.environ.get('SKIP_POLICIES','')).lower() in ["yes", "true", "1"]:
+            policy = [self.add_squeeze,
                   fc_impl,
                   self.add_topk,
                   self.add_cast,
                   self.remove_obsolete]
-
+        
         for _f in policy:
             _f()
 
