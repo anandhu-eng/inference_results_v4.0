@@ -50,7 +50,7 @@ class LLAMA2EngineBuilderOp(TRTBuilder,
                  config_ver: str = "default",
                  model_path: str = "build/models/Llama2/Llama-2-70b-chat-hf",
                  # Generated from 2/6/2024 TRTLLM devdrop
-                 fp8_quant_model_path: str = "build/models/Llama2/fp8-quantized-ammo/llama2-70b-chat-hf-tp2pp1-fp8-02072024/",
+                 fp8_quant_model_path: str = "build/models/Llama2/fp8-quantized-ammo/llama2-70b-chat-hf-tp2pp1-fp8/",
                  trt_llm_path: str = "build/TRTLLM",
                  # Override the normal default values
                  workspace_size: int = 60 << 30,

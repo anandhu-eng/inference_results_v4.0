@@ -52,7 +52,7 @@ class GPTJ6BEngineBuilderOp(TRTBuilder,
                  config_ver: str = "default",
                  # TODO: This should be a relative path within the ScratchSpace.
                  model_path: str = "build/models/GPTJ-6B/checkpoint-final",
-                 fp8_quant_model_path: str = "build/models/GPTJ-6B/fp8-quantized-ammo/GPTJ-FP8-quantized-02072024",
+                 fp8_quant_model_path: str = "build/models/GPTJ-6B/fp8-quantized-ammo/GPTJ-FP8-quantized",
                  trt_llm_path: str = "build/TRTLLM",
                  # Override the normal default values
                  workspace_size: int = 60 << 30,
