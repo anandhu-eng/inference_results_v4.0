@@ -23,6 +23,7 @@ import json
 import numpy as np
 import onnx
 import onnx_graphsurgeon as gs
+import os
 
 from nvmitten.constants import Precision
 from nvmitten.nvidia.builder import ONNXNetwork
