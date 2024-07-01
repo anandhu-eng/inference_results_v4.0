@@ -13,20 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# source code/common/file_downloads.sh
+source code/common/file_downloads.sh
 
 # Make sure the script is executed inside the container
-if [ -e /work/code/stable-diffusion-xl/tensorrt/download_model.sh ]
+if [ -e code/stable-diffusion-xl/tensorrt/download_model.sh ]
 then
     echo "Inside container, start downloading..."
 else
     echo "WARNING: Please enter the MLPerf container (make prebuild) before downloading SDXL model."
     echo "WARNING: SDXL model is NOT downloaded! Exiting..."
-    #exit 1
+    exit 1
 fi
 
-MODEL_DIR=${MLPERF_SCRATCH_PATH}/models
-DATA_DIR=${MLPERF_SCRATCH_PATH}/data
+MODEL_DIR=build/models
+DATA_DIR=build/data
 
 # Download the fp16 raw weights of MLCommon hosted HF checkpoints
 # Check whether the folder already exists, if yes then do not download
@@ -68,7 +68,7 @@ else
 fi
 
 # Run onnx generation script
-python3 -m code.stable-diffusion-xl.tensorrt.create_onnx_model --model-dir ${MODEL_DIR} --output-dir ${MODEL_DIR}
+python3 -m code.stable-diffusion-xl.tensorrt.create_onnx_model
 test $? -eq 0 || exit $?
 echo "Runing SDXL UNet quantization on 500 calibration captions. The process will take ~30 mins on DGX H100"
 python3 -m code.stable-diffusion-xl.ammo.quantize_sdxl --pretrained-base ${MODEL_DIR}/SDXL/official_pytorch/fp16/stable_diffusion_fp16/checkpoint_pipe/ --batch-size 1 \
