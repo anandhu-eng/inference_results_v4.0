@@ -344,7 +344,7 @@ class SDXLEngineBuilderOp(Operation, ArgDiscarder):
                  # TODO: Legacy value - Remove after refactor is done.
                  precision: str,  # config precision only sets the UNetXL precision
                  config_ver: str = "default",
-                 model_path: str = "models/SDXL/",
+                 model_path: str = "build/models/SDXL/",
                  **kwargs):
         super().__init__(*args, **kwargs)
 
