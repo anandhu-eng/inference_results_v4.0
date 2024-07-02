@@ -16,25 +16,29 @@
 source code/common/file_downloads.sh
 
 # Make sure the script is executed inside the container
-if [ -e code/stable-diffusion-xl/tensorrt/download_model.sh ]
-then
-    echo "Inside container, start downloading..."
-else
-    echo "WARNING: Please enter the MLPerf container (make prebuild) before downloading SDXL model."
-    echo "WARNING: SDXL model is NOT downloaded! Exiting..."
-    exit 1
-fi
+#if [ -e /code/stable-diffusion-xl/tensorrt/download_model.sh ]
+#then
+#    echo "Inside container, start downloading..."
+#else
+#    echo "WARNING: Please enter the MLPerf container (make prebuild) before downloading SDXL model."
+#    echo "WARNING: SDXL model is NOT downloaded! Exiting..."
+#    exit 1
+#fi
 
 MODEL_DIR=build/models
 DATA_DIR=build/data
 
-# Download the fp16 raw weights of MLCommon hosted HF checkpoints
-download_file models SDXL/official_pytorch/fp16 \
-    https://cloud.mlcommons.org/index.php/s/LCdW5RM6wgGWbxC/download \
-    stable_diffusion_fp16.zip
+if [ -z "$SDXL_CHECKPOINT_PATH" ]; then
+    echo "SDXL_CHECKPOINT_PATH is not set. Proceeding with download and extraction..."
 
-unzip ${MODEL_DIR}/SDXL/official_pytorch/fp16/stable_diffusion_fp16.zip \
-    -d ${MODEL_DIR}/SDXL/official_pytorch/fp16/
+    # Download the fp16 raw weights of MLCommon hosted HF checkpoints
+    download_file models SDXL/official_pytorch/fp16 \
+        https://cloud.mlcommons.org/index.php/s/LCdW5RM6wgGWbxC/download \
+        stable_diffusion_fp16.zip
+
+    unzip ${MODEL_DIR}/SDXL/official_pytorch/fp16/stable_diffusion_fp16.zip \
+        -d ${MODEL_DIR}/SDXL/official_pytorch/fp16/
+fi
 
 md5sum ${MODEL_DIR}/SDXL/official_pytorch/fp16/stable_diffusion_fp16/checkpoint_pipe/text_encoder/model.safetensors | grep "81b87e641699a4cd5985f47e99e71eeb"
 if [ $? -ne 0 ]; then
