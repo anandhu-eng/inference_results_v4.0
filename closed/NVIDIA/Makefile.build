@@ -33,7 +33,8 @@ INFERENCE_URL = https://github.com/mlcommons/inference.git
 LOADGEN_INCLUDE_DIR ?= $(INFERENCE_DIR)/loadgen
 LOADGEN_LIB_DIR ?= $(LOADGEN_INCLUDE_DIR)/build
 # 2/15/2024 ToT.
-INFERENCE_HASH = 486a629ea4d5c5150f452d0b0a196bf71fd2021e
+# updated for v4.1
+INFERENCE_HASH = 92dd3d24cf78d07aa31165f90c636d98c4adddcd
 
 # Set Environment variables to extracted contents
 export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):/usr/local/cuda/lib64:/usr/lib/$(ARCH)-linux-gnu:$(LOADGEN_LIB_DIR)
