@@ -66,6 +66,9 @@ def add_systems(name_format_string: str,
 # Grace-Hopper Superchip Systems
 add_systems("GH200_96GB_ARMx{}", "GH200-GraceHopper-Superchip_GH200-96GB_aarch64x{}",
             KnownCPU.GraceHopper_ARM.value, KnownGPU.GH200_GraceHopper_96GB.value, [1], Memory(500, ByteSuffix.GiB))
+add_systems("GH200_144GB_ARMx{}", "GH200-GraceHopper-Superchip_GH200-144GB_aarch64x{}",
+            KnownCPU.GraceHopper_ARM.value, KnownGPU.GH200_GraceHopper_144GB.value, [1], Memory(600, ByteSuffix.GiB))
+
 
 # ADA Systems
 add_systems("L40x{}", "L40x{}", KnownCPU.AMD_EPYC_7313P.value,
@@ -78,6 +81,8 @@ add_systems("L40Sx{}", "L40Sx{}", KnownCPU.AMD_EPYC_7742.value,
 # Hopper systems
 add_systems("H200_SXM_140GBx{}", "DGX-H200_H200-SXM-140GBx{}", KnownCPU.Intel_Xeon_Platinum_8480C.value,
             KnownGPU.H200_SXM_140GB.value, [1, 2, 4, 8], Memory(30, ByteSuffix.GiB))
+add_systems("H200_Full_SXM_141GBx{}", "DGX-H200_H200-Full-SXM-141GBx{}", KnownCPU.Intel_Xeon_Platinum_8480C.value,
+            KnownGPU.H200_Full_SXM_141GB.value, [1, 2, 4, 8], Memory(2, ByteSuffix.TB))
 add_systems("H100_NVL_94GBx{}", "H100-NVL-94GBx{}", KnownCPU.Intel_Xeon_Platinum_8480P.value,
             KnownGPU.H100_NVL.value, [1, 2, 4, 8], Memory(30, ByteSuffix.GiB))
 add_systems("H100_SXM_80GBx{}", "DGX-H100_H100-SXM-80GBx{}", KnownCPU.Intel_Xeon_Platinum_8480C.value,
