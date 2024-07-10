@@ -80,6 +80,12 @@ class KnownGPU(MatchableEnum):
                                  max_power_limit=1000.0,
                                  pci_id=pci_id_match_list(("2342",)),
                                  compute_sm=90)
+    GH200_GraceHopper_144GB = GPU(name="NVIDIA Graphics Device",
+                                  accelerator_type=AcceleratorType.Discrete,
+                                  vram=match_float_approximate(Memory(144, ByteSuffix.GiB)),
+                                  max_power_limit=900.0,
+                                  pci_id=pci_id_match_list(("2348",)),
+                                  compute_sm=90)
     L4 = GPU(name="NVIDIA Graphics Device",
              accelerator_type=AcceleratorType.Discrete,
              vram=match_float_approximate(Memory(23, ByteSuffix.GiB)),
@@ -122,6 +128,12 @@ class KnownGPU(MatchableEnum):
                          max_power_limit=700.0,
                          pci_id=pci_id_match_list(("2335",)),
                          compute_sm=90)
+    H200_Full_SXM_141GB = GPU(name="NVIDIA H200",
+                              accelerator_type=AcceleratorType.Discrete,
+                              vram=match_float_approximate(Memory(140, ByteSuffix.GiB)),
+                              max_power_limit=1000.0,
+                              pci_id=pci_id_match_list(("2335",)),
+                              compute_sm=90)
     A100_PCIe_40GB = GPU(AliasedName("A100-PCIe-40GB", ("A100-PCIe", "NVIDIA A100-PCIe", "NVIDIA A100-PCIe-40GB", "NVIDIA A100 40GB PCIe")),
                          AcceleratorType.Discrete,
                          match_float_approximate(Memory(40, ByteSuffix.GiB)),
