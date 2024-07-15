@@ -179,46 +179,21 @@ class SUT():
 
 
     def query_api(self, input, idx):
-        headers = {
-            'Content-Type': 'application/json',
-        }
-
-        json_data = {
-            'model_id': self.api_model_name,
-            'inputs': input,
-            'parameters': {
-                'max_new_tokens': 1024,
-                'min_new_tokens': 1,
-                'decoding_method': "GREEDY"
-            },
-        }
-
-        response_code = 0
-        while response_code != 200:
-            try:
-                response = requests.post(
-                    self.api_servers[idx],
-                    headers=headers,
-                    json=json_data,
-                    verify=False,
-                )
-                response_code = response.status_code
-            except:
-                print("connection failure")
-        return json.loads(response.text)["generated_text"]
+        pass
     
     def query_api_vllm(self, inputs, idx):
+        #print(inputs)
+        #print(idx)
         headers = {
             'Content-Type': 'application/json',
         }
 
         json_data = {
-            'model': '/opt/app-root/share/models',
-            'prompt': inputs,
-            'max_tokens': 1024,
-            'temperature': 0,
+            "model": self.api_model_name,
+            "prompt": inputs,
+            "max_tokens": 8
         }
-
+        print(json_data)
         response_code = 0
         while response_code != 200:
             try:
@@ -226,6 +201,7 @@ class SUT():
                 response_code = response.status_code
             except:
                 print("connection failure")
+                break
         return [resp["text"] for resp in json.loads(response.text)["choices"]]
 
     def query_api_grpc(self, input, idx):
