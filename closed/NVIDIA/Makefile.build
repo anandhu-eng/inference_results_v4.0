@@ -33,9 +33,9 @@ INFERENCE_URL = https://github.com/mlcommons/inference.git
 LOADGEN_INCLUDE_DIR ?= $(INFERENCE_DIR)/loadgen
 LOADGEN_LIB_DIR ?= $(LOADGEN_INCLUDE_DIR)/build
 # 2/15/2024 ToT.
-INFERENCE_HASH = 486a629ea4d5c5150f452d0b0a196bf71fd2021e
+#INFERENCE_HASH = 486a629ea4d5c5150f452d0b0a196bf71fd2021e
 # updated for v4.1
-#INFERENCE_HASH = 92dd3d24cf78d07aa31165f90c636d98c4adddcd
+INFERENCE_HASH = 725b3c0a5a13cccac49558f19c9a65676ebc89f4
 
 # Set Environment variables to extracted contents
 export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):/usr/local/cuda/lib64:/usr/lib/$(ARCH)-linux-gnu:$(LOADGEN_LIB_DIR)
@@ -201,8 +201,7 @@ clone_loadgen:
 		&& cd $(INFERENCE_DIR) \
 		&& git fetch \
 		&& git checkout $(INFERENCE_HASH) \
-		&& git submodule update --init language/bert/DeepLearningExamples \
-		&& git submodule update --init vision/medical_imaging/3d-unet-brats19/nnUnet
+		&& git submodule update --init language/bert/DeepLearningExamples
 
 
 # TODO: Need temporaray fix to support multi-gpu
@@ -351,7 +350,7 @@ build_loadgen:
 		&& make -j
 	@cd $(LOADGEN_INCLUDE_DIR) \
 		&& CFLAGS="-std=c++14 -O3" python setup.py bdist_wheel \
-		&& pip install --user --force-reinstall `ls -t ./dist/mlperf_loadgen-*.whl | head -1`
+		&& pip install --user --force-reinstall .
 
 
 # Build harness source codes.
