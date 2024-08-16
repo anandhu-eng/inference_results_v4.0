@@ -282,7 +282,10 @@ out_html = ''
 for key,value in content.items():
     out_html += "\n" + value
 
-with open("overrides/partials/content.html", "w") as f:
+filepath = os.path.jojn("overrides", "partials")
+if not os.path.exists(filepath):
+    os.makedirs(filepath)
+with open(os.path.join(filepath, "content.html"), "w") as f:
     f.write(out_html)
 
 #print(content)
