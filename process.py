@@ -30,7 +30,7 @@ def filterdata(data, keys, values):
 
 def construct_table(scenario, models, data1, data2, is_power, results1, results2):
     # Initialize the HTML table with the header
-    html = f'<table class="tablesorter" id="results_{scenario}">'
+    html = f'<div id="results_table_{scenario}"> <table class="tablesorter" id="results_{scenario}">'
     html += "<thead> <tr>"
     
     # Table header
@@ -111,7 +111,7 @@ def construct_table(scenario, models, data1, data2, is_power, results1, results2
         
         html += "</tr>"
     
-    html += "</table>"
+    html += "</table></div>"
     
     return html
 
@@ -135,14 +135,12 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
     for scenario in scenarios:
         keys = [ "Scenario", "Platform", "version" ]
         values = [ scenario, system1, sysversion1 ]
-        #query = f"SELECT * FROM mlcommons_inference_results WHERE platform='{system1}' AND scenario='{scenario}' AND version='{sysversion1}' {modelfilterstring}"
         result1 = filterdata(data, keys, values)
         if len(result1) == 0:
             continue
         
         values = [ scenario, system2, sysversion2 ]
         result2 = filterdata(data, keys, values)
-        #query = f"SELECT * FROM mlcommons_inference_results WHERE platform='{system2}' AND scenario='{scenario}' AND version='{sysversion2}' {modelfilterstring}"
         result2 = filterdata(data, keys, values)
         if len(result2) == 0:
             continue
