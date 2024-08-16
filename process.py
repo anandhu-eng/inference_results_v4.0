@@ -1,4 +1,5 @@
 import json
+import os
 
 def getuniquevalues(data, key):
     uniquevalues = []
@@ -282,7 +283,7 @@ out_html = ''
 for key,value in content.items():
     out_html += "\n" + value
 
-filepath = os.path.jojn("overrides", "partials")
+filepath = os.path.join("overrides", "partials")
 if not os.path.exists(filepath):
     os.makedirs(filepath)
 with open(os.path.join(filepath, "content.html"), "w") as f:
