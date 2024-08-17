@@ -57,7 +57,7 @@ def processdata(data, category, division, availability):
     return mydata
 
 
-def construct_table():
+def construct_table(category, division, availability):
     # Initialize the HTML table with the header
     html = '<div id="results_table"> <table class="tablesorter" id="results">'
     html += "<thead> <tr>"
@@ -174,7 +174,10 @@ Notes: {mydata[rid]['Notes']}
     
     return html
 
-html_table = construct_table()
+category = "datacenter"
+division="closed"
+availability="Available"
+html_table = construct_table(category, division, availability)
 
 html = f"""
 {tableposhtml}

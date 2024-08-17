@@ -21,7 +21,7 @@ theme:
     - toc.follow
 nav:
   - Results: index.md
-  - Compare: compare.md
+  - Compare: compare/index.md
 
 markdown_extensions:
   - pymdownx.tasklist:
