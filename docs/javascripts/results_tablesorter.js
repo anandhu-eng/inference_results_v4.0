@@ -6,7 +6,7 @@ $('table').tablesorter({
     // to use 'bootstrap' or 'jui', you'll need to add the "uitheme"
     // widget and also set it to the same name
     // this option only adds a table class name "tablesorter-{theme}"
-    theme: 'blackice',
+    theme: 'blue',
 
     // fix the column widths
     widthFixed: false,
@@ -62,13 +62,13 @@ $('table').tablesorter({
     headers: {
         // set "sorter : false" (no quotes) to disable the column
         0: {
-            sorter: "text"
+            sorter: "digit"
         },
         1: {
             sorter: "text"
         },
         3: {
-            sorter: "digit"
+            sorter: "text"
         }
     },
 
@@ -80,10 +80,7 @@ $('table').tablesorter({
     // initial sort order of the columns, example sortList: [[0,0],[1,0]],
     // [[columnIndex, sortDirection], ... ]
     sortList: [
-        [sortcolumnindex, perfsortorder],
-        [1,0],
-        [2,0],
-        [3,0]
+        [0,0]
     ],
     // default sort that is added to the end of the users sort
     // selection.

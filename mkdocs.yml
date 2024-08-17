@@ -19,11 +19,8 @@ theme:
     - navigation.tabs.sticky
     - navigation.top
     - toc.follow
-extra_javascript:
-  - javascripts/tablesorter.js
-  - javascripts/compare_results.js
 nav:
-  - HOME: index.md
+  - Results: index.md
   - Compare: compare.md
 
 markdown_extensions:

@@ -1,22 +1,36 @@
 import json
 import os
 
-def getuniquevalues(data, key):
-    uniquevalues = []
-    for item in data:
-        if item.get(key) and item.get(key) not in uniquevalues:
-            uniquevalues.append(item[key])
-    return uniquevalues
-
 with open('summary.json') as f:
     data = json.load(f)
 #print(models_all)
 #print(platforms)
 
-def processdata(data, category, division):
+tableposhtml = """
+<!-- pager -->
+<div class="pager">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+</div>
+        """
+
+
+def processdata(data, category, division, availability):
+
     mydata = {}
-    needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy" ]
-    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator" ]
+    needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location" ]
+
+    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software" ]
     for item in data:
         if item['Suite'] != category:
             continue
@@ -45,7 +59,7 @@ def processdata(data, category, division):
 
 def construct_table():
     # Initialize the HTML table with the header
-    html = '<html> <div id="results_table"> <table class="tablesorter table-material" id="results">'
+    html = '<div id="results_table"> <table class="tablesorter" id="results">'
     html += "<thead> <tr>"
     
     # Table header
@@ -54,51 +68,142 @@ def construct_table():
         <th id="col-system">System</th>
         <th id="col-submitter">Submitter</th>
         <th id="col-accelerator">Accelerator</th>
-        <th id="col-resnet50">ResNet50</th>
-        <th id="col-bert-99">Bert-99</th>
+        <th id="col-llama2-99" colspan="2">LLAMA2-70B-99</th>
+        <th id="col-llama2-99.9" colspan="2">LLAMA2-70B-99.9</th>
+        <th id="col-gptj-99" colspan="2">GPTJ-99</th>
+        <th id="col-gptj-99.9" colspan="2">GPTJ-99.9</th>
+        <th id="col-bert-99" colspan="2">Bert-99</th>
+        <th id="col-bert-99.9" colspan="2">Bert-99.9</th>
+        <th id="col-dlrm-v2-99" colspan="2">Stable Diffusion</th>
+        <th id="col-dlrm-v2-99" colspan="2">DLRM-v2-99</th>
+        <th id="col-dlrm-v2-99.9" colspan="2">DLRM-v2-99.9</th>
+        <th id="col-retinanet" colspan="2">Retinanet</th>
+        <th id="col-resnet50" colspan="2">ResNet50</th>
+        <th id="col-3d-unet-99" colspan="1">3d-unet-99</th>
+        <th id="col-3d-unet-99.9" colspan="1">3d-unet-99.9</th>
         """ 
     tableheader += "</tr>"
+    
     tableheader += f"""
+    <tr>
     <th></th>
     <th></th>
     <th></th>
     <th></th>
     <th class="col-scenario">Server</th>
     <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Offline</th>
+    <th class="col-scenario">Offline</th>
     """
+    
     
     # Add header and footer
     html += tableheader
-    html += "</thead>"
+    html += "</tr></thead>"
     html += f"<tfoot> <tr>{tableheader}</tr></tfoot>"
 
-    mydata = processdata(data, "datacenter", "closed")
-    model = [ "resnet", "bert-99" ]
+    mydata = processdata(data, "datacenter", "closed", "availability")
+    model = [ "resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"  ]
+    model = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
     for rid in mydata:
+        extra_sys_info = f"""
+Processor: {mydata[rid]['Processor']}
+Software: {mydata[rid]['Software']}
+Cores per processor: {mydata[rid]['host_processor_core_count']}
+Processors per node: {mydata[rid]['host_processors_per_node']}
+Nodes: {mydata[rid]['Nodes']}
+Notes: {mydata[rid]['Notes']}
+        """
+        a_num = mydata[rid]['a#']
+        if a_num =='':
+            acc = ""
+        else:
+            acc = f"{mydata[rid]['Accelerator']} x {int(a_num)}"
         html += f"""
         <tr>
-        <td> {rid} </tid>
-        <td> {mydata[rid]['System']} </td>
-        <td> {mydata[rid]['Submitter']} </td>
-        <td> {mydata[rid]['Accelerator']} </td>
+        <td class="col-id"> {rid} </tid>
+        <td class="col-system" title="{extra_sys_info}"> {mydata[rid]['System']} </td>
+        <td class="col-submitter"> {mydata[rid]['Submitter']} </td>
+        <td class="col-accelerator"> {acc} </td>
         """
         for m in model:
             if mydata[rid].get(m):
+                location_pre = "https://github.com/mlcommons/inference_results_v4.0/tree/main/"
+                if mydata[rid][m].get('Server'):
+                    html += f"""
+                        <td class="col-result"><a target="_blank" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
+                    """
                 html += f"""
-                <td> {mydata[rid][m]['Offline']['Performance_Result']} </td>
+                <td class="col-result"><a target="_blank" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
                 """
+            else:
+                html += f"""
+                <td></td>
+                """
+                if "3d-unet" not in m:
+                    html += f"""
+                    <td></td>
+                    """
+
 
         html += f"""
         </tr>
         """
     
-    html += "</table></div></html>"
+    html += "</table></div>"
     
     return html
 
-html = construct_table()
+html_table = construct_table()
+
+html = f"""
+{tableposhtml}
+{html_table}
+{tableposhtml}
+"""
+
+extra_scripts = """
+<script type="text/javascript">
+var sortcolumnindex = 4, perfsortorder = 1;
+</script>
+
+<script type="text/javascript" src="/javascripts/results_tablesorter.js"></script>
+
+"""
+
+out_html = f"""---
+hide:
+  - navigation
+  - toc
+---
+
+<html>
+{html}
+{extra_scripts}
+</html>
+"""
 with open(os.path.join("docs", "index.md"), "w") as f:
-    f.write(html)
+    f.write(out_html)
 
 
 #print(data)

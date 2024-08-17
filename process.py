@@ -282,19 +282,16 @@ content = process_scenarios(system1, system2, sysversion1, sysversion2, modelfil
 out_html = ''
 for key,value in content.items():
     out_html += "\n" + value
-out_html += """<script type="text/javascript" src="/javascripts/compare_results.js"></script>
-<script>
-$("table")
-    .tablesorter()
-    // bind to sort events
-    .bind("tablesorter-ready", function(e, table) {
-      // do something after the "refreshWidgets" has refreshed
-    //drawPowerChart();
-    //drawCharts();
-    drawCompareCharts();
-    });
-    </script>
-    """
+out_html += """
+<script type="text/javascript" src="/javascripts/compare_results.js">
+</script>
+"""
+
+out_html += """
+<script type="text/javascript" src="/javascripts/tablesorter.js">
+</script>
+"""
+
 #print(content)
 data1 = None
 data2 = None
