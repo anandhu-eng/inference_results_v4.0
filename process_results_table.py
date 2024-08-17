@@ -181,12 +181,18 @@ Notes: {mydata[rid]['Notes']}
     
     return html
 
-category = "datacenter"
-division="closed"
-availability="Available"
+categories = { "datacenter" : "Datacenter",
+              "edge": "Edge"
+              }
+divisions= {
+        "closed": "Closed",
+        "open": "Open"
+        }
 
 availabilities = ["Available", "Preview", "RDI" ]
 #availabilities = ["Available" ]
+division="closed"
+category="datacenter"
 html = ""
 for availability in availabilities:
     val = availability.lower()
@@ -196,7 +202,7 @@ for availability in availabilities:
 
     if html_table:
         html += f"""
-        <h2>{availability}</h2>
+        <h2>{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
 {tableposhtmlval}
 {html_table}
 {tableposhtmlval}
