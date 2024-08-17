@@ -597,17 +597,26 @@ scenarios.forEach(function(scenario) {
         results2[model] = result2.find(row => row['Model'] === model);
     });
 
-    console.log(results1);
-    console.log(results2);
+    //console.log(results1);
+    //console.log(results2);
     //let html = `<h3>Comparing ${scenario} scenario for ${data1_str} and ${data2_str}</h3>` + tableposthtml;
     let htmltable = construct_table(scenario, models, data1_str, data2_str, is_power, results1, results2);
     html = htmltable;
-    console.log(html);
+    //console.log(html);
 
     // Assuming you want to append this HTML to a specific element on your page
     var elemId = "results_" + scenario
     console.log(elemId);
     document.getElementById(elemId).innerHTML = html;
+    $('table').tablesorter();
+    var resort = true, // re-apply the current sort
+        callback = function() {
+          // do something after the updateAll method has completed
+        };
+
+      // let the plugin know that we made a update, then the plugin will
+      // automatically sort the table based on the header settings
+      $("table").trigger("updateAll", [ resort, callback ]);
     drawCompareCharts();
 });
 }
