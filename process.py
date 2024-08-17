@@ -282,13 +282,7 @@ content = process_scenarios(system1, system2, sysversion1, sysversion2, modelfil
 out_html = ''
 for key,value in content.items():
     out_html += "\n" + value
-
-filepath = os.path.join("overrides", "partials")
-if not os.path.exists(filepath):
-    os.makedirs(filepath)
-with open(os.path.join(filepath, "content.html"), "w") as f:
-    f.write(out_html)
-
+#out_html += '<script type="text/javascript" src="javascripts/compare_results.js"></script>'
 #print(content)
 data1 = None
 data2 = None
@@ -299,8 +293,11 @@ models_data = {v:k for v,k in enumerate(models_all)}
 html_form = generate_html_form(platforms_data, models_data, data1, data2, modelsdata)
 
 # Output the generated HTML
-with open("overrides/partials/content.html", "a") as f:
-    f.write(html_form)
-print(html_form)
+out_html = f"<html>{out_html}{html_form}</html>"
+
+with open(os.path.join("docs", "compare.md"), "w") as f:
+    f.write(out_html)
+
+print(out_html)
 
 

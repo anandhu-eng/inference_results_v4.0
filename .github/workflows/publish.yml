@@ -29,7 +29,10 @@ jobs:
       - name: Install Mkdocs
         run: pip install -r docs/requirements.txt
       
-      - name: Generate HTML template
+      - name: Generate HTML template for home page
+        run: python3 process_results_table.py
+
+      - name: Generate HTML template for compare page
         run: python3 process.py
 
       - name: Run Mkdocs deploy

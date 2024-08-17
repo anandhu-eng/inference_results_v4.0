@@ -3,8 +3,8 @@
 
 {% block styles %}
   {{ super() }}
-<link rel="stylesheet" rel="preload" as="style" media="all" href="thirdparty/tablesorter-master/dist/css/jquery.tablesorter.pager.min.css">
-<link rel="stylesheet" rel="preload" as="style" media="all" href="thirdparty/tablesorter-master/dist/css/theme.blackice.min.css">
+<link rel="stylesheet" rel="preload" as="style" media="all" href="/thirdparty/tablesorter-master/dist/css/jquery.tablesorter.pager.min.css">
+<link rel="stylesheet" rel="preload" as="style" media="all" href="/thirdparty/tablesorter-master/dist/css/theme.blackice.min.css">
 <style type="text/css">
 
 /* General form styling */
@@ -171,6 +171,87 @@ select.pagesize, select.gotoPage {
     width: fit-content;
     padding: 5px;
 }
+
+/* Base Table Styles */
+.table-material {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+    background-color: #fff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Header Styles */
+.table-material thead {
+    background-color: #6200ea; /* Material Design Purple */
+    color: white;
+}
+
+.table-material thead th {
+    padding: 12px 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+/* Body Styles */
+.table-material tbody tr {
+    border-bottom: 1px solid #e0e0e0; /* Light border for row separation */
+    transition: background-color 0.3s ease;
+}
+
+.table-material tbody tr:hover {
+    background-color: #f5f5f5; /* Light gray background on hover */
+}
+
+.table-material tbody td {
+    padding: 12px 15px;
+}
+
+/* Zebra Striping */
+.table-material tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Light gray for even rows */
+}
+
+/* Highlighting first column */
+.table-material tbody td:first-child {
+    font-weight: 500;
+    color: #424242; /* Darker text color for the first column */
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    .table-material tbody, .table-material thead {
+        display: block;
+    }
+
+    .table-material tbody tr {
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .table-material tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .table-material tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #6200ea; /* Material Design Purple */
+    }
+
+    .table-material thead {
+        display: none;
+    }
+}
 </style>
 
   <!-- Add scripts that need to run afterwards here -->
@@ -179,12 +260,12 @@ select.pagesize, select.gotoPage {
 {% block libs %}
 <!-- load jQuery and tablesorter scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="thirdparty/tablesorter-master/dist/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/thirdparty/tablesorter-master/dist/js/jquery.tablesorter.js"></script>
 
 <!-- tablesorter widgets (optional) -->
 
-<script type="text/javascript" src="thirdparty/tablesorter-master/dist/js/jquery.tablesorter.widgets.js"></script>
-<script type="text/javascript" src="thirdparty/tablesorter-master/dist/js/extras/jquery.tablesorter.pager.min.js"></script>
+<script type="text/javascript" src="/thirdparty/tablesorter-master/dist/js/jquery.tablesorter.widgets.js"></script>
+<script type="text/javascript" src="/thirdparty/tablesorter-master/dist/js/extras/jquery.tablesorter.pager.min.js"></script>
   <!-- Add scripts that need to run before here -->
 
   <script src="https://cdn.canvasjs.com/ga/jquery.canvasjs.min.js"></script>

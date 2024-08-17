@@ -24,6 +24,7 @@ extra_javascript:
   - javascripts/compare_results.js
 nav:
   - HOME: index.md
+  - Compare: compare.md
 
 markdown_extensions:
   - pymdownx.tasklist:
@@ -41,5 +42,4 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 plugins:
-  - search
   - macros
