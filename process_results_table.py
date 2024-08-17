@@ -30,11 +30,13 @@ def processdata(data, category, division, availability):
     mydata = {}
     needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location" ]
 
-    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software" ]
+    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details" ]
     for item in data:
         if item['Suite'] != category:
             continue
         if item['Category'] != division:
+            continue
+        if item['Availability'] != availability:
             continue
         myid = item['ID']
         if mydata.get(myid, '') == '':
@@ -59,7 +61,7 @@ def processdata(data, category, division, availability):
 
 def construct_table(category, division, availability):
     # Initialize the HTML table with the header
-    html = '<div id="results_table"> <table class="tablesorter" id="results">'
+    html = f"""<div id="results_table_{availability}"> <table class="tablesorter" id="results_{availability}">"""
     html += "<thead> <tr>"
     
     # Table header
@@ -122,9 +124,14 @@ def construct_table(category, division, availability):
     html += "</tr></thead>"
     html += f"<tfoot> <tr>{tableheader}</tr></tfoot>"
 
-    mydata = processdata(data, "datacenter", "closed", "availability")
+    mydata = processdata(data, category, division, availability)
     model = [ "resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"  ]
     model = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
+    if not mydata:
+        return None
+
+    location_pre = "https://github.com/mlcommons/inference_results_v4.0/tree/main/"
+    result_link_text = "See result logs"
     for rid in mydata:
         extra_sys_info = f"""
 Processor: {mydata[rid]['Processor']}
@@ -139,22 +146,22 @@ Notes: {mydata[rid]['Notes']}
             acc = ""
         else:
             acc = f"{mydata[rid]['Accelerator']} x {int(a_num)}"
+        system_json_link = f"""{mydata[rid]['Details'].replace("results", "systems").replace("submissions_inference_4.0", "inference_results_v4.0")}.json"""
         html += f"""
         <tr>
         <td class="col-id"> {rid} </tid>
-        <td class="col-system" title="{extra_sys_info}"> {mydata[rid]['System']} </td>
+        <td class="col-system" title="{extra_sys_info}"> <a target="_blank" href="{system_json_link}"> {mydata[rid]['System']} </a> </td>
         <td class="col-submitter"> {mydata[rid]['Submitter']} </td>
         <td class="col-accelerator"> {acc} </td>
         """
         for m in model:
             if mydata[rid].get(m):
-                location_pre = "https://github.com/mlcommons/inference_results_v4.0/tree/main/"
                 if mydata[rid][m].get('Server'):
                     html += f"""
-                        <td class="col-result"><a target="_blank" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
+                        <td class="col-result"><a target="_blank" title="{result_link_text}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
                     """
                 html += f"""
-                <td class="col-result"><a target="_blank" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
+                <td class="col-result"><a target="_blank" title="{result_link_text}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
                 """
             else:
                 html += f"""
@@ -177,13 +184,24 @@ Notes: {mydata[rid]['Notes']}
 category = "datacenter"
 division="closed"
 availability="Available"
-html_table = construct_table(category, division, availability)
 
-html = f"""
+availabilities = ["Available", "Preview", "RDI" ]
+#availabilities = ["Available" ]
+html = ""
+for availability in availabilities:
+    val = availability.lower()
+    html_table = construct_table(category, division, val)
+
+    if html_table:
+        html += f"""
+        <h2>{availability}</h2>
 {tableposhtml}
 {html_table}
 {tableposhtml}
+<hl>
 """
+    
+
 
 extra_scripts = """
 <script type="text/javascript">
