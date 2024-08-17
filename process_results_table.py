@@ -187,7 +187,7 @@ extra_scripts = """
 var sortcolumnindex = 4, perfsortorder = 1;
 </script>
 
-<script type="text/javascript" src="/javascripts/results_tablesorter.js"></script>
+<script type="text/javascript" src="javascripts/results_tablesorter.js"></script>
 
 """
 

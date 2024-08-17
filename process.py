@@ -283,12 +283,12 @@ out_html = ''
 for key,value in content.items():
     out_html += "\n" + value
 out_html += """
-<script type="text/javascript" src="/javascripts/compare_results.js">
+<script type="text/javascript" src="javascripts/compare_results.js">
 </script>
 """
 
 out_html += """
-<script type="text/javascript" src="/javascripts/tablesorter.js">
+<script type="text/javascript" src="javascripts/tablesorter.js">
 </script>
 """
 
@@ -304,7 +304,12 @@ html_form = generate_html_form(platforms_data, models_data, data1, data2, models
 # Output the generated HTML
 out_html = f"<html>{out_html}{html_form}</html>"
 
-with open(os.path.join("docs", "compare.md"), "w") as f:
+out_path = os.path.join("docs", "compare", "index.md")
+
+if not os.path.exists(os.path.dirname(out_path)):
+    os.makedirs(os.path.dirname(out_path))
+
+with open(out_path, "w") as f:
     f.write(out_html)
 
 print(out_html)

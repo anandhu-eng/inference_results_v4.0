@@ -40,3 +40,4 @@ markdown_extensions:
       alternate_style: true
 plugins:
   - macros
+  - site-urls
