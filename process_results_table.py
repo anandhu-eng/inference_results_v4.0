@@ -8,7 +8,7 @@ with open('summary.json') as f:
 
 tableposhtml = """
 <!-- pager -->
-<div class="pager">
+<div class="pager PAGER_CLASS">
             <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
             <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
             <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
@@ -190,15 +190,17 @@ availabilities = ["Available", "Preview", "RDI" ]
 html = ""
 for availability in availabilities:
     val = availability.lower()
+    pager_class= f"pager_{val}"
+    tableposhtmlval = tableposhtml.replace("PAGER_CLASS", pager_class)
     html_table = construct_table(category, division, val)
 
     if html_table:
         html += f"""
         <h2>{availability}</h2>
-{tableposhtml}
+{tableposhtmlval}
 {html_table}
-{tableposhtml}
-<hl>
+{tableposhtmlval}
+<hr>
 """
     
 
