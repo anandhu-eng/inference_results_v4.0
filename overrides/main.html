@@ -1,40 +1,5 @@
 {% extends "base.html" %}
 
-{% block htmltitlea %}
-  <title>Lorem ipsum dolor sit amet</title>
-{% endblock %}
-
-{% block contenta %}
-  {{ super() }}
-  <form method="post" action="">
-    <h3>Compare Results</h3>
-
-    <div class="form-field">
-        <label for="system1">System 1</label>
-        <select id="system1" name="system1" class="col">
-
-        </select>
-    </div>
-
-    <div class="form-field">
-        <label for="system2">System 2</label>
-        <select id="system2" name="system2" class="col">
-
-        </select>
-    </div>
-
-    <div class="form-field">
-        <label for="models">Models</label>
-        <select id="models" name="models[]" class="col" multiple>
-
-        </select>
-    </div>
-
-    <div class="form-field">
-        <button type="submit" name="okthen" value="1">Show Results</button>
-    </div>
-</form>
-{% endblock %}
 
 {% block styles %}
   {{ super() }}
