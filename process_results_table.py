@@ -50,12 +50,12 @@ def construct_table():
     
     # Table header
     tableheader = f"""
-        <th>ID</th>
-        <th>System</th>
-        <th>Submitter</th>
-        <th>Accelerator</th>
-        <th>ResNet50</th>
-        <th>GPT-J</th>
+        <th id="col-id">ID</th>
+        <th id="col-system">System</th>
+        <th id="col-submitter">Submitter</th>
+        <th id="col-accelerator">Accelerator</th>
+        <th id="col-resnet50">ResNet50</th>
+        <th id="col-bert-99">Bert-99</th>
         """ 
     tableheader += "</tr>"
     tableheader += f"""
@@ -63,8 +63,8 @@ def construct_table():
     <th></th>
     <th></th>
     <th></th>
-    <th>Server</th>
-    <th>Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
     """
     
     # Add header and footer

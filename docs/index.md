@@ -1,31 +1,31 @@
 <html> <div id="results_table"> <table class="tablesorter table-material" id="results"><thead> <tr>
-        <th>ID</th>
-        <th>System</th>
-        <th>Submitter</th>
-        <th>Accelerator</th>
-        <th>ResNet50</th>
-        <th>GPT-J</th>
+        <th id="col-id">ID</th>
+        <th id="col-system">System</th>
+        <th id="col-submitter">Submitter</th>
+        <th id="col-accelerator">Accelerator</th>
+        <th id="col-resnet50">ResNet50</th>
+        <th id="col-bert-99">Bert-99</th>
         </tr>
     <th></th>
     <th></th>
     <th></th>
     <th></th>
-    <th>Server</th>
-    <th>Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
     </thead><tfoot> <tr>
-        <th>ID</th>
-        <th>System</th>
-        <th>Submitter</th>
-        <th>Accelerator</th>
-        <th>ResNet50</th>
-        <th>GPT-J</th>
+        <th id="col-id">ID</th>
+        <th id="col-system">System</th>
+        <th id="col-submitter">Submitter</th>
+        <th id="col-accelerator">Accelerator</th>
+        <th id="col-resnet50">ResNet50</th>
+        <th id="col-bert-99">Bert-99</th>
         </tr>
     <th></th>
     <th></th>
     <th></th>
     <th></th>
-    <th>Server</th>
-    <th>Offline</th>
+    <th class="col-scenario">Server</th>
+    <th class="col-scenario">Offline</th>
     </tr></tfoot>
         <tr>
         <td> 4.0-0001 </tid>

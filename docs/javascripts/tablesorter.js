@@ -333,7 +333,7 @@ $('table').tablesorter({
     cssDisabled: 'disabled'
 
 });
-
+/*
 $('table')
     .tablesorter()
     // bind to sort events
@@ -343,7 +343,7 @@ $('table')
 	drawCharts();
 	//drawCompareCharts();
     });
-
+*/
 
 // Extend the themes to change any of the default class names ** NEW **
 $.extend($.tablesorter.themes.jui, {
