@@ -24,6 +24,52 @@ tableposhtml = """
 </div>
         """
 
+def getsummarydata(data, category, division):
+    mydata = {}
+    mycountdata = {}
+    for item in data:
+        if item['Suite'] != category:
+            continue
+        if item['Category'] != division:
+            continue
+        '''
+        if item['Availability'] != availability:
+            continue
+        '''
+        submitter = item['Submitter']
+        if mydata.get(submitter, '') == '':
+            mydata[submitter] = {}
+        myid = item['ID']
+        if mydata[submitter].get(myid, '') == '':
+            mydata[submitter][myid] = {}
+        model = item['Model']
+        if mydata[submitter][myid].get(model, '') == '':
+            mydata[submitter][myid][model] = {}
+            mydata[submitter][myid][model]['count'] = 0
+        if division == "open":
+            scenario = item['Scenario']
+            if mydata[submitter][myid][model].get(scenario, '') == '':
+                mydata[submitter][myid][model][scenario] = 0
+
+        mydata[submitter][myid][model]['count'] += 1
+
+    #print(mydata)
+    for submitter,value in mydata.items():
+        mycountdata[submitter] = {}
+        for sut, results in value.items():
+            for model, model_data in results.items():
+                if mycountdata[submitter].get(model, '') == '':
+                    mycountdata[submitter][model] = 0
+                mycountdata[submitter][model] += model_data['count']
+    return mydata, mycountdata
+
+
+
+
+
+
+
+
 
 def processdata(data, category, division, availability):
 
@@ -58,6 +104,7 @@ def processdata(data, category, division, availability):
             mydata[myid][key] = item[key]
     return mydata
 
+models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
 
 def construct_table(category, division, availability):
     # Initialize the HTML table with the header
@@ -125,10 +172,12 @@ def construct_table(category, division, availability):
     html += f"<tfoot> <tr>{tableheader}</tr></tfoot>"
 
     mydata = processdata(data, category, division, availability)
-    model = [ "resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"  ]
-    model = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
+
     if not mydata:
         return None
+
+    #models = [ "resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"  ]
+
 
     location_pre = "https://github.com/mlcommons/inference_results_v4.0/tree/main/"
     result_link_text = "See result logs"
@@ -154,7 +203,7 @@ Notes: {mydata[rid]['Notes']}
         <td class="col-submitter"> {mydata[rid]['Submitter']} </td>
         <td class="col-accelerator"> {acc} </td>
         """
-        for m in model:
+        for m in models:
             if mydata[rid].get(m):
                 if mydata[rid][m].get('Server'):
                     html += f"""
@@ -180,6 +229,78 @@ Notes: {mydata[rid]['Notes']}
     html += "</table></div>"
     
     return html
+
+
+def construct_summary_table(category, division):
+    summary_data, count_data = getsummarydata(data, category, division)
+    #print(count_data)
+
+    html  = ""
+    html += """
+    <div>
+    <table class="tablesorter">
+    <thead>
+    <tr>
+    <th>Submitter</th>
+        <th id="col-llama2-99">LLAMA2-70B-99</th>
+        <th id="col-llama2-99.9">LLAMA2-70B-99.9</th>
+        <th id="col-gptj-99">GPTJ-99</th>
+        <th id="col-gptj-99.9">GPTJ-99.9</th>
+        <th id="col-bert-99">Bert-99</th>
+        <th id="col-bert-99.9">Bert-99.9</th>
+        <th id="col-dlrm-v2-99">Stable Diffusion</th>
+        <th id="col-dlrm-v2-99">DLRM-v2-99</th>
+        <th id="col-dlrm-v2-99.9">DLRM-v2-99.9</th>
+        <th id="col-retinanet">Retinanet</th>
+        <th id="col-resnet50">ResNet50</th>
+        <th id="col-3d-unet-99">3d-unet-99</th>
+        <th id="col-3d-unet-99.9">3d-unet-99.9</th>
+        <th id="all-models">Total</th>
+        </tr>
+        </thead>
+        """
+    total_counts = {}
+    for submitter, item in count_data.items():
+        html += "<tr>"
+        cnt = 0
+
+        html += f"""<td class="col-submitter"> {submitter} </td>"""
+        for m in models:
+            if item.get(m, '') != '':
+                html += f"""<td class="col-result"> {item[m]} </td>"""
+                cnt += item[m]
+                if total_counts.get(m, '') == '':
+                    total_counts[m] = item[m]
+                else:
+                    total_counts[m] += item[m]
+            else:
+                html += f"""<td class="col-result"> 0 </td>"""
+        html += f"""<td class="col-result"> {cnt} </td>"""
+        html += "</tr>"
+    html += """
+    <tr>
+    <td>Total</td>
+    """
+    total = 0
+    for m in models:
+        if total_counts.get(m, '') != '':
+            html += f"""<td class="col-result"> {total_counts[m]} </td>"""
+            total += total_counts[m]
+        else:
+            html += f"""<td class="col-result"> 0 </td>"""
+    html += f"""<td class="col-result"> {total} </td>"""
+    html += "</tr>"
+
+    html += "</table></div>"
+    return html
+
+
+
+
+
+
+
+
 
 categories = { "datacenter" : "Datacenter",
               "edge": "Edge"
@@ -208,7 +329,13 @@ for availability in availabilities:
 {tableposhtmlval}
 <hr>
 """
-    
+summary = construct_summary_table(category, division)
+#print(summary)
+html += f"""
+<h2>Count of Results </h2>
+{summary}
+<hr>
+"""
 
 
 extra_scripts = """
