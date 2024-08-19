@@ -24,6 +24,55 @@ tableposhtml = """
 </div>
         """
 
+def get_json_files(github_url):
+    import requests
+    from bs4 import BeautifulSoup
+
+    retries = 5
+    retry_delay = 2
+
+    for attempt in range(retries):
+        try:
+            # Get the content of the GitHub page
+            response = requests.get(github_url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find all JSON files
+            #print(soup)
+            # Find the <script> tag with the specific data-target attribute
+            script_tag = soup.find('script', {'data-target': 'react-app.embeddedData', 'type': 'application/json'})
+
+            if script_tag:
+                # Extract the JSON content from the script tag
+                json_data = script_tag.string
+
+                # Parse the JSON string into a Python dictionary
+                data = json.loads(json_data)
+
+                # Access the parts of the JSON you are interested in
+                tree_items = data.get('payload', {}).get('tree', {}).get('items', [])
+                
+                json_files = [a['name'] for a in tree_items if a['name'].endswith('.json')]
+
+                return json_files
+        except requests.exceptions.RequestException as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:  # Don't wait after the last attempt
+                time.sleep(retry_delay)
+            else:
+                print("Max retries reached. Exiting.")
+                return None
+
+def find_match(files, re_name):
+    import re 
+    for file in files:
+        if re.match(re_name, file):
+            return file
+    print(re_name)
+    print(files)
+    return None
+
+
 def getsummarydata(data, category, division):
     mydata = {}
     mycountdata = {}
@@ -76,7 +125,7 @@ def processdata(data, category, division, availability):
     mydata = {}
     needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location" ]
 
-    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details" ]
+    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details", "Platform" ]
     for item in data:
         if item['Suite'] != category:
             continue
@@ -105,6 +154,16 @@ def processdata(data, category, division, availability):
     return mydata
 
 models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
+
+def get_precision_info(measurements_url, platform):
+    github_url  = measurements_url
+    measurements_json_file_name =  find_match(get_json_files(github_url), f"""^{platform}.*\\.json$""")
+    measurements_json = f"""{github_url}{measurements_json_file_name}"""
+    measurements_json_raw = measurements_json.replace("github.com", "raw.githubusercontent.com").replace("/tree/", "/")
+    import urllib.request
+    with urllib.request.urlopen(measurements_json_raw) as url:
+        data = json.load(url)
+    return data
 
 def construct_table(category, division, availability):
     # Initialize the HTML table with the header
@@ -181,6 +240,7 @@ def construct_table(category, division, availability):
 
     location_pre = "https://github.com/mlcommons/inference_results_v4.0/tree/main/"
     result_link_text = "See result logs"
+    result_link_text = ""
     for rid in mydata:
         extra_sys_info = f"""
 Processor: {mydata[rid]['Processor']}
@@ -206,11 +266,23 @@ Notes: {mydata[rid]['Notes']}
         for m in models:
             if mydata[rid].get(m):
                 if mydata[rid][m].get('Server'):
+                    github_server_url  = f"""{location_pre}{mydata[rid][m]['Server']['Location'].replace("results", "measurements")}/"""
+                    server_precision_info = get_precision_info( github_server_url, mydata[rid]['Platform'])
+                    extra_model_info = f"""Weight_data_types: {server_precision_info['weight_data_types']}
+Input_data_types: {server_precision_info['input_data_types']}
+                    """
+                    #print(server_precision_info)
+                    
                     html += f"""
-                        <td class="col-result"><a target="_blank" title="{result_link_text}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
+                        <td class="col-result"><a target="_blank" title="{result_link_text}{extra_model_info}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
+                    """
+                github_offline_url  = f"""{location_pre}{mydata[rid][m]['Offline']['Location'].replace("results", "measurements")}/"""
+                offline_precision_info = get_precision_info( github_offline_url, mydata[rid]['Platform'])
+                extra_model_info = f"""Weight data types: {offline_precision_info['weight_data_types']}
+Input data types: {offline_precision_info['input_data_types']}
                     """
                 html += f"""
-                <td class="col-result"><a target="_blank" title="{result_link_text}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
+                <td class="col-result"><a target="_blank" title="{result_link_text}{extra_model_info}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
                 """
             else:
                 html += f"""
