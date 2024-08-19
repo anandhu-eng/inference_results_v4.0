@@ -25,15 +25,15 @@ function construct_table(scenario, models, data1, data2, isPower, results1, resu
     models.forEach((row) => {
         html += "<tr>";
         html += `<td class='model'>${row}</td>`;
-        const perf1 = results1[row].Performance_Result;
-        const perf2 = results2[row].Performance_Result;
+        const perf1 = Math.round(results1[row].Performance_Result, 1);
+        const perf2 = Math.round(results2[row].Performance_Result, 1);
         let perfdelta = 0;
         if (perf2) {
             perfdelta = Math.round((1 - perf1 / perf2) * 10000) / 100;
         }
-        html += `<td>${perf1}</td>`;
-        html += `<td>${perf2}</td>`;
-        html += `<td>${perfdelta}</td>`;
+        html += `<td class="col-result">${perf1}</td>`;
+        html += `<td class="col-result">${perf2}</td>`;
+        html += `<td class="col-result">${perfdelta}</td>`;
 
         if (isPower) {
             const pow1 = results1[row].Power_Result;
@@ -55,12 +55,12 @@ function construct_table(scenario, models, data1, data2, isPower, results1, resu
             if (peff2) {
                 peffdelta = Math.round((1 - peff1 / peff2) * 10000) / 100;
             }
-            html += `<td>${pow1}</td>`;
-            html += `<td>${pow2}</td>`;
-            html += `<td>${powdelta}</td>`;
-            html += `<td>${peff1}</td>`;
-            html += `<td>${peff2}</td>`;
-            html += `<td>${peffdelta}</td>`;
+            html += `<td class="col-result">${pow1}</td>`;
+            html += `<td class="col-result">${pow2}</td>`;
+            html += `<td class="col-result">${powdelta}</td>`;
+            html += `<td class="col-result">${peff1}</td>`;
+            html += `<td class="col-result">${peff2}</td>`;
+            html += `<td class="col-result">${peffdelta}</td>`;
         }
         html += "</tr>";
     });

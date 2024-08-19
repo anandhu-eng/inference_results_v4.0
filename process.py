@@ -65,18 +65,18 @@ def construct_table(scenario, models, data1, data2, is_power, results1, results2
         html += "<tr>"
         html += f"<td class='model'>{row}</td>"
         
-        perf1 = results1[row]['Performance_Result']
-        perf2 = results2[row]['Performance_Result']
+        perf1 = round(results1[row]['Performance_Result'], 1)
+        perf2 = round(results2[row]['Performance_Result'], 1)
         
         if perf2:
             perfdelta = round((1 - (perf1 / perf2)),4) * 100
-            perfdelta = round(perfdelta, 2)
+            perfdelta = round(perfdelta, 1)
         else:
             perfdelta = ""
         
-        html += f"<td>{perf1}</td>"
-        html += f"<td>{perf2}</td>"
-        html += f"<td>{perfdelta}</td>"
+        html += f"<td class='col-result'>{perf1}</td>"
+        html += f"<td class='col-result'>{perf2}</td>"
+        html += f"<td class='col-result'>{perfdelta}</td>"
         
         if is_power:
             pow1 = results1[row]['Power_Result']
@@ -97,11 +97,11 @@ def construct_table(scenario, models, data1, data2, is_power, results1, results2
             else:
                 peff2 = ""
             
-            html += f"<td>{pow1}</td>"
-            html += f"<td>{pow2}</td>"
-            html += f"<td>{powdelta}</td>"
-            html += f"<td>{peff1}</td>"
-            html += f"<td>{peff2}</td>"
+            html += f"<td class='col-result'>{pow1}</td>"
+            html += f"<td class='col-result'>{pow2}</td>"
+            html += f"<td class='col-result'>{powdelta}</td>"
+            html += f"<td class='col-result'>{peff1}</td>"
+            html += f"<td class='col-result>{peff2}</td>"
             
             if peff2:
                 peffdelta = round(((1 - peff1 / peff2)), 4) * 100
