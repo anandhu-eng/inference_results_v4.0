@@ -237,11 +237,11 @@ def construct_summary_table(category, division):
 
     html  = ""
     html += """
-    <div>
-    <table class="tablesorter">
+    <div class="counttable_wrapper">
+    <table class="tablesorter counttable">
     <thead>
     <tr>
-    <th>Submitter</th>
+    <th class="count-submitter">Submitter</th>
         <th id="col-llama2-99">LLAMA2-70B-99</th>
         <th id="col-llama2-99.9">LLAMA2-70B-99.9</th>
         <th id="col-gptj-99">GPTJ-99</th>
@@ -264,7 +264,7 @@ def construct_summary_table(category, division):
         html += "<tr>"
         cnt = 0
 
-        html += f"""<td class="col-submitter"> {submitter} </td>"""
+        html += f"""<td class="count-submitter"> {submitter} </td>"""
         for m in models:
             if item.get(m, '') != '':
                 html += f"""<td class="col-result"> {item[m]} </td>"""
@@ -279,7 +279,7 @@ def construct_summary_table(category, division):
         html += "</tr>"
     html += """
     <tr>
-    <td>Total</td>
+    <td class="count-submitter">Total</td>
     """
     total = 0
     for m in models:

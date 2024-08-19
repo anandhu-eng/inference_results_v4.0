@@ -8,14 +8,14 @@
 <link rel="stylesheet" rel="preload" as="style" media="all" href="thirdparty/tablesorter-master/dist/css/theme.blue.min.css">
 <style type="text/css">
 
-table#results_available, table#results_preview, table#results_rdi {
+table.resultstable, table.counttable {
     overflow-x: auto;
 }
 
 .pager1{
     display: none!important;
 }
-div#results_table_available, div#results_table_preview, div#results_table_rdi {
+.resultstable_wrapper, .counttable_wrapper {
     overflow-x: auto;
 }
 
@@ -277,6 +277,17 @@ td.col-accelerator, th.col-accelerator {
     left: 350px;
 }
 
+td.count-submitter, th.count-submitter {
+    min-width: 150px;
+    max-width: 150px;
+    width: 150px;
+    left: 0px;
+    background: white;
+    font-weight: 600;
+    font-size: Large;
+    word-break: break-word;
+    position:sticky;
+}
 .col-scenario {
     font-weight: 500;
     color: #6200ea;
