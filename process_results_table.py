@@ -268,8 +268,8 @@ Notes: {mydata[rid]['Notes']}
                 if mydata[rid][m].get('Server'):
                     github_server_url  = f"""{location_pre}{mydata[rid][m]['Server']['Location'].replace("results", "measurements")}/"""
                     server_precision_info = get_precision_info( github_server_url, mydata[rid]['Platform'])
-                    extra_model_info = f"""Weight_data_types: {server_precision_info['weight_data_types']}
-Input_data_types: {server_precision_info['input_data_types']}
+                    extra_model_info = f"""Weight data types: {server_precision_info['weight_data_types']}
+Input data types: {server_precision_info['input_data_types']}
                     """
                     #print(server_precision_info)
                     
