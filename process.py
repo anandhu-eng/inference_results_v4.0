@@ -76,7 +76,7 @@ def construct_table(scenario, models, data1, data2, is_power, results1, results2
         
         html += f"<td class='col-result'>{perf1}</td>"
         html += f"<td class='col-result'>{perf2}</td>"
-        html += f"<td class='col-result'>{perfdelta}</td>"
+        html += f"<td class='col-result'>{perfdelta}%</td>"
         
         if is_power:
             pow1 = results1[row]['Power_Result']
@@ -99,7 +99,7 @@ def construct_table(scenario, models, data1, data2, is_power, results1, results2
             
             html += f"<td class='col-result'>{pow1}</td>"
             html += f"<td class='col-result'>{pow2}</td>"
-            html += f"<td class='col-result'>{powdelta}</td>"
+            html += f"<td class='col-result'>{powdelta}%</td>"
             html += f"<td class='col-result'>{peff1}</td>"
             html += f"<td class='col-result>{peff2}</td>"
             
@@ -108,7 +108,7 @@ def construct_table(scenario, models, data1, data2, is_power, results1, results2
             else:
                 peffdelta = ""
             
-            html += f"<td>{peffdelta}</td>"
+            html += f"<td>{peffdelta}%</td>"
         
         html += "</tr>"
     

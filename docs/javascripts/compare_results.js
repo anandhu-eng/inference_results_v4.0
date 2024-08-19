@@ -33,7 +33,7 @@ function construct_table(scenario, models, data1, data2, isPower, results1, resu
         }
         html += `<td class="col-result">${perf1}</td>`;
         html += `<td class="col-result">${perf2}</td>`;
-        html += `<td class="col-result">${perfdelta}</td>`;
+        html += `<td class="col-result">${perfdelta}%</td>`;
 
         if (isPower) {
             const pow1 = results1[row].Power_Result;
@@ -57,10 +57,10 @@ function construct_table(scenario, models, data1, data2, isPower, results1, resu
             }
             html += `<td class="col-result">${pow1}</td>`;
             html += `<td class="col-result">${pow2}</td>`;
-            html += `<td class="col-result">${powdelta}</td>`;
+            html += `<td class="col-result">${powdelta}%</td>`;
             html += `<td class="col-result">${peff1}</td>`;
             html += `<td class="col-result">${peff2}</td>`;
-            html += `<td class="col-result">${peffdelta}</td>`;
+            html += `<td class="col-result">${peffdelta}%</td>`;
         }
         html += "</tr>";
     });
