@@ -108,15 +108,15 @@ models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99"
 
 def construct_table(category, division, availability):
     # Initialize the HTML table with the header
-    html = f"""<div id="results_table_{availability}"> <table class="tablesorter" id="results_{availability}">"""
+    html = f"""<div id="results_table_{availability}" class="resultstable_wrapper"> <table class="resultstable tablesorter" id="results_{availability}">"""
     html += "<thead> <tr>"
     
     # Table header
     tableheader = f"""
-        <th id="col-id">ID</th>
-        <th id="col-system">System</th>
-        <th id="col-submitter">Submitter</th>
-        <th id="col-accelerator">Accelerator</th>
+        <th id="col-id" class="headcol col-id">ID</th>
+        <th id="col-system" class="headcol col-system">System</th>
+        <th id="col-submitter" class="headcol col-submitter">Submitter</th>
+        <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
         <th id="col-llama2-99" colspan="2">LLAMA2-70B-99</th>
         <th id="col-llama2-99.9" colspan="2">LLAMA2-70B-99.9</th>
         <th id="col-gptj-99" colspan="2">GPTJ-99</th>
@@ -135,10 +135,10 @@ def construct_table(category, division, availability):
     
     tableheader += f"""
     <tr>
-    <th></th>
-    <th></th>
-    <th></th>
-    <th></th>
+    <th class="headcol col-id"></th>
+    <th class="headcol col-system"></th>
+    <th class="headcol col-submitter"></th>
+    <th class="headcol col-accelerator"></th>
     <th class="col-scenario">Server</th>
     <th class="col-scenario">Offline</th>
     <th class="col-scenario">Server</th>
@@ -198,10 +198,10 @@ Notes: {mydata[rid]['Notes']}
         system_json_link = f"""{mydata[rid]['Details'].replace("results", "systems").replace("submissions_inference_4.0", "inference_results_v4.0")}.json"""
         html += f"""
         <tr>
-        <td class="col-id"> {rid} </tid>
-        <td class="col-system" title="{extra_sys_info}"> <a target="_blank" href="{system_json_link}"> {mydata[rid]['System']} </a> </td>
-        <td class="col-submitter"> {mydata[rid]['Submitter']} </td>
-        <td class="col-accelerator"> {acc} </td>
+        <td class="col-id headcol"> {rid} </td>
+        <td class="col-system headcol" title="{extra_sys_info}"> <a target="_blank" href="{system_json_link}"> {mydata[rid]['System']} </a> </td>
+        <td class="col-submitter headcol"> {mydata[rid]['Submitter']} </td>
+        <td class="col-accelerator headcol"> {acc} </td>
         """
         for m in models:
             if mydata[rid].get(m):

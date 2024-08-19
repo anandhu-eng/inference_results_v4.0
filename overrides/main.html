@@ -245,20 +245,36 @@ select.pagesize, select.gotoPage {
 #col-accelerator {
     font-weight: bold;
 }
-#col-id {
+#col-id, .col-id {
     min-width: 80px;
+    max-width: 80px;
+    width: 80px;
+    left: 0px;
 }
 td.col-result {
     min-width: 100px;
     text-align: right!important;
 }
-td.col-system {
+td.col-system, th.col-system {
     min-width: 150px;
+    max-width: 150px;
+    width: 150px;
     word-break: break-word;
+    left: 80px;
 }
-td.col-submitter {
+td.col-submitter, th.col-submitter {
     min-width: 120px;
+    max-width: 120px;
+    width: 120px;
     word-break: break-word;
+    left: 230px;
+}
+td.col-accelerator, th.col-accelerator {
+    min-width: 120px;
+    max-width: 120px;
+    width: 120px;
+    word-break: break-word;
+    left: 350px;
 }
 
 .col-scenario {
@@ -272,6 +288,11 @@ td.col-submitter {
     color: #303f9f; /* Material Design Blue */
     font-weight: 600;
 }
+
+.headcol {
+  position: sticky;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
