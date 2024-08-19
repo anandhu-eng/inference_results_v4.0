@@ -294,6 +294,27 @@ def construct_summary_table(category, division):
     html += "</table></div>"
     return html
 
+def construct_summary_charts(category, division):
+    summary_data, count_data = getsummarydata(data, category, division)
+    # number of submission per each submitter
+    # the output should be a list of dictionary [{x:, y:number}]
+    no_of_submissions_by_submitter = []
+    for submitter, item in count_data.items():
+        item_data = {"indexLabel": submitter}
+        for m in models:
+            if submitter not in item_data:
+                item_data['y'] = item.get(m, 0) # assign the number of submissions as 0 initially if the model m is not submitted bu submitter
+            else:
+                item_data['y'] += int(item.get(m,0))
+        no_of_submissions_by_submitter.append(item_data)
+    pie_chart_data = f"""
+<script type='text/javascript'>
+    var dataPointsSubmittervsSubmission = {no_of_submissions_by_submitter};
+    alert(dataPointsSubmittervsSubmission)
+</script>
+    """
+    return pie_chart_data      
+
 
 
 
@@ -338,12 +359,21 @@ html += f"""
 """
 
 
+html += f"""
+<div id="ContainerSubmitterSubmissions" style="height: 300px; width: 100%;"></div>
+<div id="pieContainerSubmitterSubmissions" style="height: 300px; width: 100%;"></div>
+"""
+
+html += construct_summary_charts(category, division)
+
 extra_scripts = """
 <script type="text/javascript">
 var sortcolumnindex = 4, perfsortorder = 1;
 </script>
 
 <script type="text/javascript" src="javascripts/results_tablesorter.js"></script>
+<script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+<script type="text/javascript" src="javascripts/results_submitter_analysis.js"></script>
 
 """
 
