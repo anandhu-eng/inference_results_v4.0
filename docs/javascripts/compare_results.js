@@ -9,18 +9,21 @@ function construct_table(scenario, models, data1, data2, isPower, results1, resu
         <th>${data2}</th>
         <th>Performance Delta</th>`;
 
+ 
     if (isPower) {
+        console.log(results1[0]);
+        const power_unit = results1[models[0]].Power_Units;
         tableHeader += `
-        <th>Power 1</th>
-        <th>Power 2</th>
+        <th>${data1} ${power_unit} </th>
+        <th>${data2} ${power_unit}</th>
         <th>Power Delta</th>
-        <th>Power Efficiency 1</th>
-        <th>Power Efficiency 2</th>
-        <th>Power Efficiency Delta</th>`;
+        <th>Samples/J</th>
+        <th>Samples/J</th>
+        <th>Samples/J Delta</th>`;
     }
     tableHeader += `</tr>`;
     html += tableHeader + "</thead>";
-    html += `<tfoot><tr>${tableHeader}</tr></tfoot>`;
+    //html += `<tfoot><tr>${tableHeader}</tr></tfoot>`;
 
     models.forEach((row) => {
         html += "<tr>";
@@ -36,8 +39,8 @@ function construct_table(scenario, models, data1, data2, isPower, results1, resu
         html += `<td class="col-result">${perfdelta}%</td>`;
 
         if (isPower) {
-            const pow1 = results1[row].Power_Result;
-            const pow2 = results2[row].Power_Result;
+            const pow1 = Math.round(results1[row].Power_Result, 1);
+            const pow2 = Math.round(results2[row].Power_Result, 1);
             let powdelta = 0;
             let peff1 = "";
             let peff2 = "";
@@ -611,7 +614,7 @@ scenarios.forEach(function(scenario) {
         results2[model] = result2.find(row => row['Model'] === model);
     });
 
-    //console.log(results1);
+    console.log(results1);
     //console.log(results2);
     $("#table_header_"+scenario).text(`Comparing ${scenario} scenario for ${data1_str} and ${data2_str}`);
     //is_power = (result2[0]['has_power'])

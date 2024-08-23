@@ -55,7 +55,7 @@ def construct_table(scenario, models, data1, data2, is_power, results1, results2
     # Add header and footer
     html += tableheader
     html += "</thead>"
-    html += f"<tfoot> <tr>{tableheader}</tr></tfoot>"
+    #html += f"<tfoot> <tr>{tableheader}</tr></tfoot>"
     
     # Initialize performance title (not used in the original PHP code, but included for completeness)
     performance_title = "Samples per Second"
