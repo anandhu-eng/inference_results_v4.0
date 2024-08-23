@@ -562,20 +562,26 @@ function reConstructTables(system1, sysversion1, system2, sysversion2, selected_
 scenarios.forEach(function(scenario) {
     let keys = ["Scenario", "Platform", "version"];
     let values = [scenario, system1, sysversion1];
+    //console.log(scenario);    
 
     let result1 = filterdata(data, keys, values);
     if (result1.length === 0) {
+        $("#"+scenario).hide();
+        //console.log(scenario +" is getting hidden")
         return; // Continue to the next scenario
     }
 
     values = [scenario, system2, sysversion2];
     let result2 = filterdata(data, keys, values);
     if (result2.length === 0) {
+        $("#"+scenario).hide();
+        //console.log(scenario +" is getting hidden")
         return; // Continue to the next scenario
     }
+    $("#"+scenario).show();
 
     let is_power = result1[0]['has_power'] && result2[0]['has_power'];
-    console.log("is_power " + is_power);
+    //console.log("is_power " + is_power);
 
     let data1_str = `${sysversion1}: ${system1}`;
     let data2_str = `${sysversion2}: ${system2}`;
@@ -610,7 +616,7 @@ scenarios.forEach(function(scenario) {
     $("#table_header_"+scenario).text(`Comparing ${scenario} scenario for ${data1_str} and ${data2_str}`);
     //is_power = (result2[0]['has_power'])
     //is_power = false
-    //console.log(result1);    
+    //console.log(scenario);    
         
     data1[scenario] = data1_str, data2[scenario] = data2_str, draw_power[scenario] = is_power, draw_power_efficiency[scenario] = is_power;
 

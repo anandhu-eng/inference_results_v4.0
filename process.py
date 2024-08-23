@@ -172,7 +172,7 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
         
         tableposthtml = """
             <!-- pager -->
-            <div class="pager">
+            <div class="pager1">
             <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
             <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
             <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
@@ -188,7 +188,7 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
             </div>
         """
         
-        html = f"""<h3 id="table_header_{scenario}">Comparing {scenario} scenario for {data1_str} and {data2_str}</h3>""" + tableposthtml
+        html = f"""<div id="{scenario}"> <h3 id="table_header_{scenario}">Comparing {scenario} scenario for {data1_str} and {data2_str}</h3>""" + tableposthtml
         htmltable = construct_table(scenario, models, data1_str, data2_str, is_power, results1, results2)
         html += htmltable
         html += tableposthtml
@@ -206,6 +206,12 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
             <button class="btn btn-primary power-content"  id="printChart{scenario}2">Download</button>
             <div id="chartContainer{scenario}3" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
             <button class="btn btn-primary power-content"  id="printChart{scenario}3">Download</button>
+        """
+        
+        content[f'custom_{customid}'] += f"""
+        </div>
+        <hr>
+        <hr>
         """
         
         customid += 1
