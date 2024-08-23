@@ -470,7 +470,7 @@ function fetchSummaryData() {
 
 
 function fetchAndStoreData(db) {
-    $.getJSON("https://raw.githubusercontent.com/GATEOverflow/inference_results_v4.0/docs/summary.json", function(data) {
+    $.getJSON("https://raw.githubusercontent.com/GATEOverflow/inference_results_v4.0/main/summary_results.json", function(data) {
         // Begin a transaction to save data in IndexedDB
         var transaction = db.transaction(["myStore"], "readwrite");
         var objectStore = transaction.objectStore("myStore");
