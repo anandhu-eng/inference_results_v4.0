@@ -211,7 +211,6 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
         content[f'custom_{customid}'] += f"""
         </div>
         <hr>
-        <hr>
         """
         
         customid += 1
