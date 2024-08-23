@@ -188,7 +188,7 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
             </div>
         """
         
-        html = f"<h3>Comparing {scenario} scenario for {data1_str} and {data2_str}</h3>" + tableposthtml
+        html = f"""<h3 id="table_header_{scenario}">Comparing {scenario} scenario for {data1_str} and {data2_str}</h3>""" + tableposthtml
         htmltable = construct_table(scenario, models, data1_str, data2_str, is_power, results1, results2)
         html += htmltable
         html += tableposthtml

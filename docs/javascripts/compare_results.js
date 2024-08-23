@@ -553,9 +553,7 @@ function readAllData() {
     });
 }
 
-// Assume the following variables and functions are defined elsewhere in your code:
 // scenarios, system1, sysversion1, system2, sysversion2, data, ytitle_scenarios
-// Also assume that `filterdata` and `construct_table` are JavaScript functions that work similarly to their Python counterparts
 function reConstructTables(system1, sysversion1, system2, sysversion2, data) {
     scenarios = [ "Offline", "Server", "SingleStream", "MultiStream"];
 scenarios.forEach(function(scenario) {
@@ -599,14 +597,24 @@ scenarios.forEach(function(scenario) {
 
     //console.log(results1);
     //console.log(results2);
-    //let html = `<h3>Comparing ${scenario} scenario for ${data1_str} and ${data2_str}</h3>` + tableposthtml;
+    $("#table_header_"+scenario).text(`Comparing ${scenario} scenario for ${data1_str} and ${data2_str}`);
+    //is_power = (result2[0]['has_power'])
+    is_power = false
+    if(is_power)
+        power_string = true
+    else
+        power_string = false
+        
+        
+    data1[scenario] = data1_str, data2[scenario] = data2_str, draw_power[scenario] = power_string, draw_power_efficiency[scenario] = power_string;
+
     let htmltable = construct_table(scenario, models, data1_str, data2_str, is_power, results1, results2);
     html = htmltable;
     //console.log(html);
 
     // Assuming you want to append this HTML to a specific element on your page
     var elemId = "results_" + scenario
-    console.log(elemId);
+    //console.log(elemId);
     document.getElementById(elemId).innerHTML = html;
     $('table').tablesorter();
     var resort = true, // re-apply the current sort
