@@ -401,21 +401,24 @@ $( document ).on( "click", "#results_MultiStream thead th", function() {
 
 
 $(document).ready(function() {
+    if(!is_power) {
+        $('.power-content').hide();
+    }
     $('#compareform').submit(function(event) {
         event.preventDefault(); // This will cancel the form submission
 
         // Your custom logic here
-        console.log('Form submission canceled.');
+        //console.log('Form submission canceled.');
         var system1 = $('#system1 option:selected').text();
         var system2 = $('#system2 option:selected').text();
-        var models = $('#models option:selected').map(function() {
+        var selected_models = $('#models option:selected').map(function() {
             return $(this).text();
         }).get();
 
-        console.log(system1);
-        console.log(system2);
-        console.log(models);
-        scenario = "Offline";
+        //console.log(system1);
+        //console.log(system2);
+        //console.log(selected_models);
+        //scenario = "Offline";
         //getSummaryData();
         /*   constructTable(scenario, models, system1, system2, False, results1, results2) {
 
@@ -423,10 +426,10 @@ $(document).ready(function() {
         */
         var data;
         readAllData().then(function(allData) {
-            console.log(allData);
+            //console.log(allData);
             sysversion1 = "v4.0";
             sysversion2 = "v4.0";
-            reConstructTables(system1, sysversion1, system2, sysversion2, allData);
+            reConstructTables(system1, sysversion1, system2, sysversion2, selected_models, allData);
         }).catch(function(error) {
             console.error(error);
         });
@@ -458,7 +461,7 @@ function fetchSummaryData() {
     };
 
     request.onerror = function(event) {
-        console.log("Error opening IndexedDB: " + event.target.errorCode);
+        console.error("Error opening IndexedDB: " + event.target.errorCode);
     };
 }
 
@@ -554,7 +557,7 @@ function readAllData() {
 }
 
 // scenarios, system1, sysversion1, system2, sysversion2, data, ytitle_scenarios
-function reConstructTables(system1, sysversion1, system2, sysversion2, data) {
+function reConstructTables(system1, sysversion1, system2, sysversion2, selected_models, data) {
     scenarios = [ "Offline", "Server", "SingleStream", "MultiStream"];
 scenarios.forEach(function(scenario) {
     let keys = ["Scenario", "Platform", "version"];
@@ -571,8 +574,8 @@ scenarios.forEach(function(scenario) {
         return; // Continue to the next scenario
     }
 
-    let is_power = result2[0]['has_power'];
-    let power_string = is_power ? "true" : "false";
+    let is_power = result1[0]['has_power'] && result2[0]['has_power'];
+    console.log("is_power " + is_power);
 
     let data1_str = `${sysversion1}: ${system1}`;
     let data2_str = `${sysversion2}: ${system2}`;
@@ -582,8 +585,15 @@ scenarios.forEach(function(scenario) {
     let result2_models = result2.map(row => row['Model']);
 
     result1.forEach(function(row) {
-        if (!models.includes(row['Model']) && result2_models.includes(row['Model'])) {
-            models.push(row['Model']);
+        if (selected_models == "All models") {
+            if (!models.includes(row['Model']) && result2_models.includes(row['Model'])) {
+                models.push(row['Model']);
+            }
+        }
+        else {
+            if (!models.includes(row['Model']) && result2_models.includes(row['Model']) && selected_models.includes(row['Model']) ) {
+                models.push(row['Model']);
+            }
         }
     });
 
@@ -599,17 +609,20 @@ scenarios.forEach(function(scenario) {
     //console.log(results2);
     $("#table_header_"+scenario).text(`Comparing ${scenario} scenario for ${data1_str} and ${data2_str}`);
     //is_power = (result2[0]['has_power'])
-    is_power = false
-    if(is_power)
-        power_string = true
-    else
-        power_string = false
+    //is_power = false
+    //console.log(result1);    
         
-        
-    data1[scenario] = data1_str, data2[scenario] = data2_str, draw_power[scenario] = power_string, draw_power_efficiency[scenario] = power_string;
+    data1[scenario] = data1_str, data2[scenario] = data2_str, draw_power[scenario] = is_power, draw_power_efficiency[scenario] = is_power;
 
     let htmltable = construct_table(scenario, models, data1_str, data2_str, is_power, results1, results2);
     html = htmltable;
+    if(is_power) {
+        $('.power-content').show();
+    }
+    else{
+        $('.power-content').hide();
+    }
+
     //console.log(html);
 
     // Assuming you want to append this HTML to a specific element on your page

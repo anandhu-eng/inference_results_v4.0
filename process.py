@@ -155,7 +155,7 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
         
         content[f'custom_{customid}'] = f"""
         <script type='text/javascript'>
-        data1['{scenario}'] = '{data1_str}', data2['{scenario}'] = '{data2_str}', draw_power['{scenario}'] = {power_string}, draw_power_efficiency['{scenario}'] = {power_string},
+        data1['{scenario}'] = '{data1_str}', data2['{scenario}'] = '{data2_str}', draw_power['{scenario}'] = {power_string}, draw_power_efficiency['{scenario}'] = {power_string}, is_power = {power_string},
         ytitle['{scenario}'] = '{ytitle}',
         sortcolumnindex = 4, perfsortorder = 1;
         </script>
@@ -201,13 +201,12 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
             <div id="chartContainer{scenario}1" class="bgtext" style="height: 370px; width: 100%;"></div>
             <button class="btn btn-primary"  id="printChart{scenario}1">Download</button>
         """
-        if is_power:
-            content[f'custom_{customid}'] += f"""
-            <div id="chartContainer{scenario}2" class="bgtext" style="height: 370px; width: 100%;"></div>
-            <button class="btn btn-primary"  id="printChart{scenario}2">Download</button>
-            <div id="chartContainer{scenario}3" class="bgtext" style="height: 370px; width: 100%;"></div>
-            <button class="btn btn-primary"  id="printChart{scenario}3">Download</button>
-            """
+        content[f'custom_{customid}'] += f"""
+            <div id="chartContainer{scenario}2" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChart{scenario}2">Download</button>
+            <div id="chartContainer{scenario}3" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChart{scenario}3">Download</button>
+        """
         
         customid += 1
     
@@ -227,8 +226,9 @@ def generate_html_form(platforms, models_all, data1=None, data2=None, modelsdata
     # Create select options for system 1 and system 2
     def generate_select_options(options, selected_value):
         html = ""
+        #print(options)
         for key, value in options.items():
-            selected = 'selected' if key == selected_value else ''
+            selected = 'selected' if value == selected_value else ''
             html += f"<option value='{key}' {selected}>{value}</option>\n"
         return html
 
@@ -312,6 +312,6 @@ if not os.path.exists(os.path.dirname(out_path)):
 with open(out_path, "w") as f:
     f.write(out_html)
 
-print(out_html)
+#print(out_html)
 
 
