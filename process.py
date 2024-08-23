@@ -284,7 +284,9 @@ sysversion2 = "v4.0"
 modelfilterstring = ""
 
 content = process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstring)
-out_html = ''
+
+out_html = ""
+
 for key,value in content.items():
     out_html += "\n" + value
 out_html += """
@@ -307,7 +309,15 @@ models_data = {v:k for v,k in enumerate(models_all)}
 html_form = generate_html_form(platforms_data, models_data, data1, data2, modelsdata)
 
 # Output the generated HTML
-out_html = f"<html>{out_html}{html_form}</html>"
+out_html = f"""---
+hide:
+  - toc
+---
+
+<html>
+{out_html}{html_form}
+</html>
+"""
 
 out_path = os.path.join("docs", "compare", "index.md")
 

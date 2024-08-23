@@ -14,11 +14,11 @@ function construct_table(scenario, models, data1, data2, isPower, results1, resu
         console.log(results1[0]);
         const power_unit = results1[models[0]].Power_Units;
         tableHeader += `
-        <th>${data1} ${power_unit} </th>
-        <th>${data2} ${power_unit}</th>
+        <th>System 1 ${power_unit} </th>
+        <th>System 2 ${power_unit}</th>
         <th>Power Delta</th>
-        <th>Samples/J</th>
-        <th>Samples/J</th>
+        <th>System 1 Samples/J</th>
+        <th>System 2 Samples/J</th>
         <th>Samples/J Delta</th>`;
     }
     tableHeader += `</tr>`;
