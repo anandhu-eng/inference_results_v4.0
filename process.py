@@ -137,16 +137,19 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
         keys = [ "Scenario", "Platform", "version" ]
         values = [ scenario, system1, sysversion1 ]
         result1 = filterdata(data, keys, values)
-        if len(result1) == 0:
-            continue
+        content[f'custom_{customid}'] = f""
         
         values = [ scenario, system2, sysversion2 ]
         result2 = filterdata(data, keys, values)
         result2 = filterdata(data, keys, values)
-        if len(result2) == 0:
-            continue
+        if len(result1) == 0 or len(result2) == 0:
+            display_string=f"""style="display:none"
+            """
+        else:
+            display_string =""
+            
         
-        is_power = (result2[0]['has_power'])
+        is_power = len(result2) > 0 and (result2[0]['has_power'])
         power_string = "true" if is_power else "false"
         
         data1_str = f"{sysversion1}: {system1}"
@@ -188,7 +191,7 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
             </div>
         """
         
-        html = f"""<div id="{scenario}"> <h3 id="table_header_{scenario}">Comparing {scenario} scenario for {data1_str} and {data2_str}</h3>""" + tableposthtml
+        html = f"""<div id="{scenario}" {display_string}> <h3 id="table_header_{scenario}">Comparing {scenario} scenario for {data1_str} and {data2_str}</h3>""" + tableposthtml
         htmltable = construct_table(scenario, models, data1_str, data2_str, is_power, results1, results2)
         html += htmltable
         html += tableposthtml
@@ -209,8 +212,8 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
         """
         
         content[f'custom_{customid}'] += f"""
-        </div>
         <hr>
+        </div>
         """
         
         customid += 1

@@ -614,7 +614,7 @@ scenarios.forEach(function(scenario) {
         results2[model] = result2.find(row => row['Model'] === model);
     });
 
-    console.log(results1);
+    //console.log(results1);
     //console.log(results2);
     $("#table_header_"+scenario).text(`Comparing ${scenario} scenario for ${data1_str} and ${data2_str}`);
     //is_power = (result2[0]['has_power'])
