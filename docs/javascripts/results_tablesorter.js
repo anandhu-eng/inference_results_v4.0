@@ -1042,48 +1042,144 @@ $(document).ready(function() {
 
 function reConstructTables(category, division, with_power, data){
     availabilities = [ "Available", "Preview", "RDI" ]; 
-    var html = ``;
-    var tableposhtml = `
-<!-- pager -->
-<div class="pager PAGER_CLASS">
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
-            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
-            <select class="pagesize" title="Select page size">
-            <option selected="selected" value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="all">All</option>
-            </select>
-            <select class="gotoPage" title="Select page number"></select>
-</div>`
     availabilities.forEach(function(availability) {
         // filtered data as per the user choice
         const filteredResults = filterData(category, division, with_power, availability, data);
         console.log(filteredResults.length);
-        var html_table = constructTable(category, division, with_power, availability, data);
+        var html_table = constructTable(category, division, with_power, availability, filteredResults);
+        var tableHeading = `${category} Category: ${availability} submissions in ${division} division`;
         // replacing the old table with the newly constructed one
-        var elemId = `results_${availability.toLowerCase()}` 
-        console.log(elemId)
+        var elemIdTable = `results_${availability.toLowerCase()}` 
+        var elemIdTableHeading = `results_heading_${availability.toLowerCase()}`
         if (html_table) {
-            document.getElementById(elemId).innerHTML = html_table;
-            $('table').tablesorter();
-            $("table").trigger("updateAll");
+            document.getElementById(elemIdTable).innerHTML = html_table;
+            document.getElementById(elemIdTableHeading).innerHTML = tableHeading;
         }
-        // let pager_class = `pager_${availability.toLowerCase()}`;
-        // let tableposhtmlval = tableposhtml.replace("PAGER_CLASS", pager_class);
-        // if (html_table) {
-        //     html += `
-        //     <h2>${category} Category: ${availability} submissions in ${division} division</h2>
-        //     ${tableposhtmlval}
-        //     ${html_table}
-        //     ${tableposhtmlval}
-        //     <hr>
-        //     `;
-        // }
     });
+    var countResultsTable = constructSummaryTable(data, category, division, with_power)
+    var elemIdTableSummary = `results_summary`
+    document.getElementById(elemIdTableSummary).innerHTML = countResultsTable;
+    $('table').tablesorter();
+    $("table").trigger("updateAll");
+}
+
+// to get the data summary for results count
+function getSummaryData(data, category, division, with_power) {
+    const myData = {};
+    const myCountData = {};
+    data.forEach(item => {        
+        if (item.Suite !== category) {
+            return;
+        }
+        if (item.Category !== division) {
+            return;
+        }
+
+        // filtering by power or just performance
+        let powerMatch;
+        if (with_power === "true") {
+            powerMatch = item.hasOwnProperty('Power_Result'); // Check for the key
+        } else {
+            powerMatch = !item.hasOwnProperty('Power_Result'); // Check for absence of the key
+        }
+        if (!powerMatch) {
+            return;
+        }
+
+        const submitter = item.Submitter;
+        if (!myData[submitter]) {
+            myData[submitter] = {};
+        }
+        const myId = item.ID;
+        if (!myData[submitter][myId]) {
+            myData[submitter][myId] = {};
+        }
+        const model = item.Model;
+        if (!myData[submitter][myId][model]) {
+            myData[submitter][myId][model] = { count: 0 };
+        }
+
+        myData[submitter][myId][model].count += 1;
+    });
+
+    for (const submitter in myData) {
+        myCountData[submitter] = {};
+        const value = myData[submitter];
+        for (const sut in value) {
+            const results = value[sut];
+            for (const model in results) {
+                const modelData = results[model];
+                if (!myCountData[submitter][model]) {
+                    myCountData[submitter][model] = 0;
+                }
+                myCountData[submitter][model] += modelData.count;
+            }
+        }
+    }
+
+    return [myData, myCountData];
+}
+
+function constructSummaryTable(data, category, division, with_power) {
+    const [summaryData, countData] = getSummaryData(data, category, division, with_power);
+    let html = ``
+    html += `
+        <thead>
+        <tr>
+        <th class="count-submitter">Submitter</th>
+            <th id="col-llama2-99">LLAMA2-70B-99</th>
+            <th id="col-llama2-99.9">LLAMA2-70B-99.9</th>
+            <th id="col-gptj-99">GPTJ-99</th>
+            <th id="col-gptj-99.9">GPTJ-99.9</th>
+            <th id="col-bert-99">Bert-99</th>
+            <th id="col-bert-99.9">Bert-99.9</th>
+            <th id="col-dlrm-v2-99">Stable Diffusion</th>
+            <th id="col-dlrm-v2-99">DLRM-v2-99</th>
+            <th id="col-dlrm-v2-99.9">DLRM-v2-99.9</th>
+            <th id="col-retinanet">Retinanet</th>
+            <th id="col-resnet50">ResNet50</th>
+            <th id="col-3d-unet-99">3d-unet-99</th>
+            <th id="col-3d-unet-99.9">3d-unet-99.9</th>
+            <th id="all-models">Total</th>
+            </tr>
+            </thead>
+    `;
+    const totalCounts = {};
+    const models = ["resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"];
+    for (const submitter in countData) {
+        html += "<tr>";
+        let cnt = 0;
+
+        html += `<td class="count-submitter"> ${submitter} </td>`;
+        for (const model of models) {
+            if (countData[submitter][model] !== undefined) {
+                html += `<td class="col-result"> ${countData[submitter][model]} </td>`;
+                cnt += countData[submitter][model];
+                totalCounts[model] = (totalCounts[model] || 0) + countData[submitter][model];
+            } else {
+                html += `<td class="col-result"> 0 </td>`;
+            }
+        }
+        html += `<td class="col-result"> ${cnt} </td>`;
+        html += "</tr>";
+    }
+
+    html += `
+    <tr>
+    <td class="count-submitter">Total</td>
+    `;
+    let total = 0;
+    for (const model of models) {
+        if (totalCounts[model] !== undefined) {
+            html += `<td class="col-result"> ${totalCounts[model]} </td>`;
+            total += totalCounts[model];
+        } else {
+            html += `<td class="col-result"> 0 </td>`;
+        }
+    }
+    html += `<td class="col-result"> ${total} </td>`;
+    html += "</tr>";
+    return html
 }
 
 function constructTable(category, division, with_power, availability, data) {

@@ -311,7 +311,7 @@ def construct_summary_table(category, division):
     html  = ""
     html += """
     <div class="counttable_wrapper">
-    <table class="tablesorter counttable">
+    <table class="tablesorter counttable" id="results_summary">
     <thead>
     <tr>
     <th class="count-submitter">Submitter</th>
@@ -443,7 +443,7 @@ for availability in availabilities:
 
     if html_table:
         html += f"""
-        <h2>{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
+        <h2 id="results_heading_{availability.lower()}">{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
 {tableposhtmlval}
 {html_table}
 {tableposhtmlval}
