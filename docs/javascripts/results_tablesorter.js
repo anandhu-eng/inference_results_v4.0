@@ -264,7 +264,7 @@ $('#results_available').tablesorter({
     debug: false
 
 }).tablesorterPager({
-    
+
     // target the pager markup - see the HTML block below
     container: $(".pager_available"),
 
@@ -597,7 +597,7 @@ $('#results_preview').tablesorter({
     debug: false
 
 }).tablesorterPager({
-    
+
     // target the pager markup - see the HTML block below
     container: $(".pager_preview"),
 
@@ -930,7 +930,7 @@ $('#results_rdi').tablesorter({
     debug: false
 
 }).tablesorterPager({
-    
+
     // target the pager markup - see the HTML block below
     container: $(".pager_rdi"),
 
@@ -1024,20 +1024,20 @@ $(document).ready(function() {
         var with_power = $('#with_power option:selected').map(function() {
             return $(this).val();
         }).get();
-        console.log(category);
-        console.log(division);
-        console.log(with_power[0]);
+        //console.log(category);
+        //console.log(division);
+        //console.log(with_power[0]);
         var data;
         readAllData().then(function(allData) {
-            console.log(allData);
+          //  console.log(allData);
             reConstructTables(category, division, with_power[0], allData);
         }).catch(function(error) {
             console.error(error);
         });
-      }
+    }
     );
 
-        fetchSummaryData();
+    fetchSummaryData();
 });
 
 function reConstructTables(category, division, with_power, data){
@@ -1045,7 +1045,7 @@ function reConstructTables(category, division, with_power, data){
     availabilities.forEach(function(availability) {
         // filtered data as per the user choice
         const filteredResults = filterData(category, division, with_power, availability, data);
-        console.log(filteredResults.length);
+        //console.log(filteredResults.length);
         var html_table = constructTable(category, division, with_power, availability, filteredResults);
         var tableHeading = `${category} Category: ${availability} submissions in ${division} division`;
         // replacing the old table with the newly constructed one
@@ -1123,6 +1123,7 @@ function getSummaryData(data, category, division, with_power) {
 function constructSummaryTable(data, category, division, with_power) {
     const [summaryData, countData] = getSummaryData(data, category, division, with_power);
     let html = ``
+    if (category == "datacenter") {
     html += `
         <thead>
         <tr>
@@ -1133,7 +1134,7 @@ function constructSummaryTable(data, category, division, with_power) {
             <th id="col-gptj-99.9">GPTJ-99.9</th>
             <th id="col-bert-99">Bert-99</th>
             <th id="col-bert-99.9">Bert-99.9</th>
-            <th id="col-dlrm-v2-99">Stable Diffusion</th>
+            <th id="col-sdxl">Stable Diffusion</th>
             <th id="col-dlrm-v2-99">DLRM-v2-99</th>
             <th id="col-dlrm-v2-99.9">DLRM-v2-99.9</th>
             <th id="col-retinanet">Retinanet</th>
@@ -1144,8 +1145,33 @@ function constructSummaryTable(data, category, division, with_power) {
             </tr>
             </thead>
     `;
+    }
+    else {
+    html += `
+        <thead>
+        <tr>
+        <th class="count-submitter">Submitter</th>
+            <th id="col-gptj-99">GPTJ-99</th>
+            <th id="col-gptj-99.9">GPTJ-99.9</th>
+            <th id="col-bert-99">Bert-99</th>
+            <th id="col-sdxl">Stable Diffusion</th>
+            <th id="col-retinanet">Retinanet</th>
+            <th id="col-resnet50">ResNet50</th>
+            <th id="col-3d-unet-99">3d-unet-99</th>
+            <th id="col-3d-unet-99.9">3d-unet-99.9</th>
+            <th id="all-models">Total</th>
+            </tr>
+            </thead>
+    `;
+    }
     const totalCounts = {};
-    const models = ["resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"];
+    models = [];
+        if (category == "datacenter") {
+            models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
+        }
+        else{
+            models = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
+        }
     for (const submitter in countData) {
         html += "<tr>";
         let cnt = 0;
@@ -1186,7 +1212,9 @@ function constructTable(category, division, with_power, availability, data) {
     let html = ``;
     // Table header
     html += `<thead> <tr>`
-    let tableheader = `
+    let tableheader = ``;
+    if (category == "datacenter") {
+        tableheader = `
         <th id="col-id" class="headcol col-id">ID</th>
         <th id="col-system" class="headcol col-system">System</th>
         <th id="col-submitter" class="headcol col-submitter">Submitter</th>
@@ -1235,10 +1263,51 @@ function constructTable(category, division, with_power, availability, data) {
         <th class="col-scenario">Offline</th>
         <th class="col-scenario">Offline</th>
     `;
+    }
+    else {
+        tableheader = `
+        <th id="col-id" class="headcol col-id">ID</th>
+        <th id="col-system" class="headcol col-system">System</th>
+        <th id="col-submitter" class="headcol col-submitter">Submitter</th>
+        <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
+        <th id="col-gptj-99" colspan="2">GPTJ-99</th>
+        <th id="col-gptj-99.9" colspan="2">GPTJ-99.9</th>
+        <th id="col-bert-99" colspan="2">Bert-99</th>
+        <th id="col-dlrm-v2-99" colspan="2">Stable Diffusion</th>
+        <th id="col-retinanet" colspan="3">Retinanet</th>
+        <th id="col-resnet50" colspan="3">ResNet50</th>
+        <th id="col-3d-unet-99" colspan="2">3d-unet-99</th>
+        <th id="col-3d-unet-99.9" colspan="2">3d-unet-99.9</th>
+    </tr>
+    <tr>
+        <th class="headcol col-id"></th>
+        <th class="headcol col-system"></th>
+        <th class="headcol col-submitter"></th>
+        <th class="headcol col-accelerator"></th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+        <th class="col-scenario">MultiStream</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+        <th class="col-scenario">MultiStream</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">SingleStream</th>
+    `;
+    }
     html += tableheader;
     html += `</tr></thead>`
     html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
-    console.log("here")
+    //console.log("here")
     var mydata = processData(data, category, division, availability)
     if (!Object.keys(mydata).length) {
         return null; // return if mydata is null
@@ -1267,9 +1336,16 @@ function constructTable(category, division, with_power, availability, data) {
             <td class="col-submitter headcol"> ${mydata[rid].Submitter} </td>
             <td class="col-accelerator headcol"> ${acc} </td>
         `;
-        const models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanett", "resnet50", "3d-unet-99", "3d-unet-99.9"];
+        let models = [];
+        if (category == "datacenter") {
+            models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
+        }
+        else{
+            models = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
+        }
         models.forEach(m => {
             if (mydata[rid][m]) {
+                //console.log(mydata[rid][m]);
                 if (mydata[rid][m].Server) {
                     let github_server_url = `${location_pre}${mydata[rid][m].Server.Location.replace("results", "measurements")}/`;
                     // A temporary key value from summary_results.json is taken as server_precision_info
@@ -1287,13 +1363,40 @@ Input data types: ${server_precision_info}`;
                 let offline_precision_info = mydata[rid][m].Offline.compliance;
                 let extra_model_info = `Weight data types: ${offline_precision_info}
 Input data types: ${offline_precision_info}`;
-            
+
                 html += `
                     <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Offline.Location}"> ${Math.round(mydata[rid][m].Offline.Performance_Result * 10) / 10} </a> </td>
                 `;
+                if (mydata[rid][m].SingleStream) {
+                    let github_ss_url = `${location_pre}${mydata[rid][m].SingleStream.Location.replace("results", "measurements")}/`;
+                    // A temporary key value from summary_results.json is taken as server_precision_info
+                    // To be included in summary_results.json
+                    let ss_precision_info = mydata[rid][m].SingleStream.compliance;
+                    let extra_model_info = `Weight data types: ${ss_precision_info}
+Input data types: ${ss_precision_info}`;
+                    html += `
+                        <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].SingleStream.Location}"> ${Math.round(mydata[rid][m].SingleStream.Performance_Result * 10) / 10} </a> </td>
+                    `;
+                }
+                if (mydata[rid][m].MultiStream) {
+                    let github_ms_url = `${location_pre}${mydata[rid][m].MultiStream.Location.replace("results", "measurements")}/`;
+                    // A temporary key value from summary_results.json is taken as server_precision_info
+                    // To be included in summary_results.json
+                    let ms_precision_info = mydata[rid][m].MultiStream.compliance;
+                    let extra_model_info = `Weight data types: ${ms_precision_info}
+Input data types: ${ms_precision_info}`;
+                    html += `
+                        <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].MultiStream.Location}"> ${Math.round(mydata[rid][m].MultiStream.Performance_Result * 10) / 10} </a> </td>
+                    `;
+                }
             }else {
                 html += `<td></td>`;
-                if (!m.includes("3d-unet")) {
+                if (!m.includes("3d-unet") || category == "edge") 
+                {
+                    html += `<td></td>`;
+                }
+                if (m.includes("retinanet") || m.includes("resnet")) 
+                {
                     html += `<td></td>`;
                 }
             }
@@ -1301,15 +1404,15 @@ Input data types: ${offline_precision_info}`;
         html += `</tr>`;
     }
     // html += "</table>";
-    
-    console.log(html)
+
+    //console.log(html)
 
     return html
 }
 
 
 
-    
+
 //     data.forEach(item => {
 //         console.log(item.ID)
 //         let extra_sys_info = `
@@ -1341,7 +1444,7 @@ Input data types: ${offline_precision_info}`;
 //                     let server_precision_info = item.compliance;
 //                     let extra_model_info = `Weight data types: ${server_precision_info}
 // Input data types: ${server_precision_info}`;
-                    
+
 //                     html += `
 //                         <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${item.Location}"> ${Math.round(item.Performance_Result * 10) / 10} </a> </td>
 //                     `;
@@ -1352,7 +1455,7 @@ Input data types: ${offline_precision_info}`;
 //                 let offline_precision_info = item.compliance;
 //                 let extra_model_info = `Weight data types: ${offline_precision_info}
 // Input data types: ${offline_precision_info}`;
-                
+
 //                 html += `
 //                 <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${item[m].Offline.Location}"> ${Math.round(item.Performance_Result * 10) / 10} </a> </td>
 //                 `;
@@ -1373,7 +1476,7 @@ function processData(data, category, division, availability) {
     const myData = {};
     const neededKeysModel = ["has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location"];
     const neededKeysSystem = ["System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details", "Platform"];
-    
+
     data.forEach(item => {
         if (item.Suite !== category.toLowerCase()) {
             return;
@@ -1424,7 +1527,7 @@ function filterData(category, division, with_power, availability, data) {
 
     data.forEach(item => {
         // the key value pair mapping in summary_results.json is a bit different. please refer to it.
-        console.log(`category is: ${item.Category} and division is ${typeof with_power}`);
+        //console.log(`category is: ${item.Category} and division is ${typeof with_power}`);
         const categoryMatch = item.Category === division.toLowerCase();
         const divisionMatch = item.Suite === category.toLowerCase(); 
         const availabilityMatch = item.Availability == availability.toLowerCase();
@@ -1483,7 +1586,7 @@ function fetchAndStoreData(db) {
             var request = objectStore.add(item);
             request.onsuccess = function(event) {
                 if(i % 1000 === 0)
-                console.log("Data has been added to your database, record:", i+1);
+                    console.log("Data has been added to your database, record:", i+1);
             };
 
             request.onerror = function(event) {
@@ -1497,7 +1600,7 @@ function fetchAndStoreData(db) {
         };
 
         transaction.onerror = function(event) {
-           // console.error("Transaction error: " + event.target.errorCode);
+            // console.error("Transaction error: " + event.target.errorCode);
         };
     }).fail(function(jqxhr, textStatus, error) {
         console.error("Request Failed: " + textStatus + ", " + error);
