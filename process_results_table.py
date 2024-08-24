@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 with open('summary_results.json') as f:
     data = json.load(f)
@@ -310,7 +311,7 @@ def construct_summary_table(category, division):
     html  = ""
     html += """
     <div class="counttable_wrapper">
-    <table class="tablesorter counttable">
+    <table class="tablesorter counttable" id="results_summary">
     <thead>
     <tr>
     <th class="count-submitter">Submitter</th>
@@ -366,14 +367,6 @@ def construct_summary_table(category, division):
     html += "</table></div>"
     return html
 
-
-
-
-
-
-
-
-
 categories = { "datacenter" : "Datacenter",
               "edge": "Edge"
               }
@@ -381,6 +374,61 @@ divisions= {
         "closed": "Closed",
         "open": "Open"
         }
+
+def generate_html_form(categories, divisions, selected_category=None, selected_division=None, with_power=None):
+    # Setting default values if not provided
+    if not selected_category:
+        selected_category = ''
+    if not selected_division:
+        selected_division = ''
+    if with_power is None:
+        with_power = 'false'
+
+    # Create select options for categories and divisions
+    def generate_select_options(options, selected_value):
+        html = ""
+        for key, value in options.items():
+            selected = 'selected' if key == selected_value else ''
+            html += f"<option value='{key}' {selected}>{value}</option>\n"
+        return html
+
+    category_options = generate_select_options(categories, selected_category)
+    division_options = generate_select_options(divisions, selected_division)
+
+    # Generate the HTML for the form
+    html_form = f"""
+    <form id="resultSelectionForm" method="post" action="">
+        <h3>Select Category and Division</h3>
+
+        <div class="form-field">
+            <label for="category">Category</label>
+            <select id="category" name="category" class="col">
+                {category_options}
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="division">Division</label>
+            <select id="division" name="division" class="col">
+                {division_options}
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="with_power">Power</label>
+            <select id="with_power" name="with_power" class="col">
+                <option value="true" {'selected' if with_power == 'true' else ''}>Performance and Power</option>
+                <option value="false" {'selected' if with_power == 'false' else ''}>Performance only</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <button type="submit" name="submit" value="1" id="results_tablesorter">Submit</button>
+        </div>
+    </form>
+    """
+
+    return html_form
 
 availabilities = ["Available", "Preview", "RDI" ]
 #availabilities = ["Available" ]
@@ -395,7 +443,7 @@ for availability in availabilities:
 
     if html_table:
         html += f"""
-        <h2>{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
+        <h2 id="results_heading_{availability.lower()}">{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
 {tableposhtmlval}
 {html_table}
 {tableposhtmlval}
@@ -408,6 +456,8 @@ html += f"""
 {summary}
 <hr>
 """
+
+html += generate_html_form(categories, divisions)
 
 
 extra_scripts = """
@@ -435,60 +485,5 @@ with open(os.path.join("docs", "index.md"), "w") as f:
 
 
 #print(data)
-def generate_html_form(platforms, models_all, data1=None, data2=None, modelsdata=None):
-    # Setting default values if not provided
-    if not data1:
-        data1 = ''
-    if not data2:
-        data2 = ''
-    if not modelsdata:
-        modelsdata = 'All models'
 
-    # Create select options for system 1 and system 2
-    def generate_select_options(options, selected_value):
-        html = ""
-        for key, value in options.items():
-            selected = 'selected' if key == selected_value else ''
-            html += f"<option value='{key}' {selected}>{value}</option>\n"
-        return html
-
-    system1_options = generate_select_options(platforms, data1)
-    system2_options = generate_select_options(platforms, data2)
-
-    # Create select options for models
-    models_options = generate_select_options(models_all, modelsdata)
-
-    # Generate the HTML for the form
-    html_form = f"""
-    <form id="compareform"  method="post" action="">
-        <h3>Compare Results</h3>
-
-        <div class="form-field">
-            <label for="system1">System 1</label>
-            <select id="system1" name="system1" class="col">
-                {system1_options}
-            </select>
-        </div>
-
-        <div class="form-field">
-            <label for="system2">System 2</label>
-            <select id="system2" name="system2" class="col">
-                {system2_options}
-            </select>
-        </div>
-
-        <div class="form-field">
-            <label for="models">Models</label>
-            <select id="models" name="models[]" class="col" multiple>
-                {models_options}
-            </select>
-        </div>
-
-        <div class="form-field">
-            <button type="submit" name="okthen" value="1" id="compare_results">Compare SUTs</button>
-        </div>
-    </form>
-    """
-
-    return html_form
 

@@ -1009,6 +1009,537 @@ $('table')
     });
 
 
+$(document).ready(function() {
+    console.log('Document is ready');
+    // if(!is_power) {
+    //     $('.power-content').hide();
+    // }
+    $('#resultSelectionForm').submit(function(event) {
+        event.preventDefault(); // This will cancel the form submission
+
+        // Your custom logic here
+        //console.log('Form submission canceled.');
+        var category = $('#category option:selected').val();
+        var division = $('#division option:selected').val();
+        var with_power = $('#with_power option:selected').map(function() {
+            return $(this).val();
+        }).get();
+        console.log(category);
+        console.log(division);
+        console.log(with_power[0]);
+        var data;
+        readAllData().then(function(allData) {
+            console.log(allData);
+            reConstructTables(category, division, with_power[0], allData);
+        }).catch(function(error) {
+            console.error(error);
+        });
+      }
+    );
+
+        fetchSummaryData();
+});
+
+function reConstructTables(category, division, with_power, data){
+    availabilities = [ "Available", "Preview", "RDI" ]; 
+    availabilities.forEach(function(availability) {
+        // filtered data as per the user choice
+        const filteredResults = filterData(category, division, with_power, availability, data);
+        console.log(filteredResults.length);
+        var html_table = constructTable(category, division, with_power, availability, filteredResults);
+        var tableHeading = `${category} Category: ${availability} submissions in ${division} division`;
+        // replacing the old table with the newly constructed one
+        var elemIdTable = `results_${availability.toLowerCase()}` 
+        var elemIdTableHeading = `results_heading_${availability.toLowerCase()}`
+        if (html_table) {
+            document.getElementById(elemIdTable).innerHTML = html_table;
+            document.getElementById(elemIdTableHeading).innerHTML = tableHeading;
+        }
+    });
+    var countResultsTable = constructSummaryTable(data, category, division, with_power)
+    var elemIdTableSummary = `results_summary`
+    document.getElementById(elemIdTableSummary).innerHTML = countResultsTable;
+    $('table').tablesorter();
+    $("table").trigger("updateAll");
+}
+
+// to get the data summary for results count
+function getSummaryData(data, category, division, with_power) {
+    const myData = {};
+    const myCountData = {};
+    data.forEach(item => {        
+        if (item.Suite !== category) {
+            return;
+        }
+        if (item.Category !== division) {
+            return;
+        }
+
+        // filtering by power or just performance
+        let powerMatch;
+        if (with_power === "true") {
+            powerMatch = item.hasOwnProperty('Power_Result'); // Check for the key
+        } else {
+            powerMatch = !item.hasOwnProperty('Power_Result'); // Check for absence of the key
+        }
+        if (!powerMatch) {
+            return;
+        }
+
+        const submitter = item.Submitter;
+        if (!myData[submitter]) {
+            myData[submitter] = {};
+        }
+        const myId = item.ID;
+        if (!myData[submitter][myId]) {
+            myData[submitter][myId] = {};
+        }
+        const model = item.Model;
+        if (!myData[submitter][myId][model]) {
+            myData[submitter][myId][model] = { count: 0 };
+        }
+
+        myData[submitter][myId][model].count += 1;
+    });
+
+    for (const submitter in myData) {
+        myCountData[submitter] = {};
+        const value = myData[submitter];
+        for (const sut in value) {
+            const results = value[sut];
+            for (const model in results) {
+                const modelData = results[model];
+                if (!myCountData[submitter][model]) {
+                    myCountData[submitter][model] = 0;
+                }
+                myCountData[submitter][model] += modelData.count;
+            }
+        }
+    }
+
+    return [myData, myCountData];
+}
+
+function constructSummaryTable(data, category, division, with_power) {
+    const [summaryData, countData] = getSummaryData(data, category, division, with_power);
+    let html = ``
+    html += `
+        <thead>
+        <tr>
+        <th class="count-submitter">Submitter</th>
+            <th id="col-llama2-99">LLAMA2-70B-99</th>
+            <th id="col-llama2-99.9">LLAMA2-70B-99.9</th>
+            <th id="col-gptj-99">GPTJ-99</th>
+            <th id="col-gptj-99.9">GPTJ-99.9</th>
+            <th id="col-bert-99">Bert-99</th>
+            <th id="col-bert-99.9">Bert-99.9</th>
+            <th id="col-dlrm-v2-99">Stable Diffusion</th>
+            <th id="col-dlrm-v2-99">DLRM-v2-99</th>
+            <th id="col-dlrm-v2-99.9">DLRM-v2-99.9</th>
+            <th id="col-retinanet">Retinanet</th>
+            <th id="col-resnet50">ResNet50</th>
+            <th id="col-3d-unet-99">3d-unet-99</th>
+            <th id="col-3d-unet-99.9">3d-unet-99.9</th>
+            <th id="all-models">Total</th>
+            </tr>
+            </thead>
+    `;
+    const totalCounts = {};
+    const models = ["resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"];
+    for (const submitter in countData) {
+        html += "<tr>";
+        let cnt = 0;
+
+        html += `<td class="count-submitter"> ${submitter} </td>`;
+        for (const model of models) {
+            if (countData[submitter][model] !== undefined) {
+                html += `<td class="col-result"> ${countData[submitter][model]} </td>`;
+                cnt += countData[submitter][model];
+                totalCounts[model] = (totalCounts[model] || 0) + countData[submitter][model];
+            } else {
+                html += `<td class="col-result"> 0 </td>`;
+            }
+        }
+        html += `<td class="col-result"> ${cnt} </td>`;
+        html += "</tr>";
+    }
+
+    html += `
+    <tr>
+    <td class="count-submitter">Total</td>
+    `;
+    let total = 0;
+    for (const model of models) {
+        if (totalCounts[model] !== undefined) {
+            html += `<td class="col-result"> ${totalCounts[model]} </td>`;
+            total += totalCounts[model];
+        } else {
+            html += `<td class="col-result"> 0 </td>`;
+        }
+    }
+    html += `<td class="col-result"> ${total} </td>`;
+    html += "</tr>";
+    return html
+}
+
+function constructTable(category, division, with_power, availability, data) {
+    let html = ``;
+    // Table header
+    html += `<thead> <tr>`
+    let tableheader = `
+        <th id="col-id" class="headcol col-id">ID</th>
+        <th id="col-system" class="headcol col-system">System</th>
+        <th id="col-submitter" class="headcol col-submitter">Submitter</th>
+        <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
+        <th id="col-llama2-99" colspan="2">LLAMA2-70B-99</th>
+        <th id="col-llama2-99.9" colspan="2">LLAMA2-70B-99.9</th>
+        <th id="col-gptj-99" colspan="2">GPTJ-99</th>
+        <th id="col-gptj-99.9" colspan="2">GPTJ-99.9</th>
+        <th id="col-bert-99" colspan="2">Bert-99</th>
+        <th id="col-bert-99.9" colspan="2">Bert-99.9</th>
+        <th id="col-dlrm-v2-99" colspan="2">Stable Diffusion</th>
+        <th id="col-dlrm-v2-99" colspan="2">DLRM-v2-99</th>
+        <th id="col-dlrm-v2-99.9" colspan="2">DLRM-v2-99.9</th>
+        <th id="col-retinanet" colspan="2">Retinanet</th>
+        <th id="col-resnet50" colspan="2">ResNet50</th>
+        <th id="col-3d-unet-99" colspan="1">3d-unet-99</th>
+        <th id="col-3d-unet-99.9" colspan="1">3d-unet-99.9</th>
+    </tr>
+    <tr>
+        <th class="headcol col-id"></th>
+        <th class="headcol col-system"></th>
+        <th class="headcol col-submitter"></th>
+        <th class="headcol col-accelerator"></th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Offline</th>
+    `;
+    html += tableheader;
+    html += `</tr></thead>`
+    html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
+    console.log("here")
+    var mydata = processData(data, category, division, availability)
+    if (!Object.keys(mydata).length) {
+        return null; // return if mydata is null
+    }
+
+    let location_pre = `https://github.com/mlcommons/inference_results_v4.0/tree/main/`;
+    let result_link_text = ``;
+
+    for (let rid in mydata) {
+        let extra_sys_info = `
+            Processor: ${mydata[rid].Processor}
+            Software: ${mydata[rid].Software}
+            Cores per processor: ${mydata[rid].host_processor_core_count}
+            Processors per node: ${mydata[rid].host_processors_per_node}
+            Nodes: ${mydata[rid].Nodes}
+            Notes: ${mydata[rid].Notes}
+        `;
+
+        let a_num = mydata[rid]['a#'] || '';
+        let acc = a_num === '' ? "" : `${mydata[rid].Accelerator} x ${parseInt(a_num)}`;
+        let system_json_link = mydata[rid].Details.replace("results", "systems").replace("submissions_inference_4.0", "inference_results_v4.0") + ".json";
+        html += `
+        <tr>
+            <td class="col-id headcol"> ${rid} </td>
+            <td class="col-system headcol" title="${extra_sys_info}"> <a target="_blank" href="${system_json_link}"> ${mydata[rid].System} </a> </td>
+            <td class="col-submitter headcol"> ${mydata[rid].Submitter} </td>
+            <td class="col-accelerator headcol"> ${acc} </td>
+        `;
+        const models = ["resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"];
+        models.forEach(m => {
+            if (mydata[rid][m]) {
+                if (mydata[rid][m].Server) {
+                    let github_server_url = `${location_pre}${mydata[rid][m].Server.Location.replace("results", "measurements")}/`;
+                    // A temporary key value from summary_results.json is taken as server_precision_info
+                    // To be included in summary_results.json
+                    let server_precision_info = mydata[rid][m].Server.compliance;
+                    let extra_model_info = `Weight data types: ${server_precision_info}
+Input data types: ${server_precision_info}`;
+                    html += `
+                        <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Server.Location}"> ${Math.round(mydata[rid][m].Server.Performance_Result * 10) / 10} </a> </td>
+                    `;
+                }
+                let github_offline_url = `${location_pre}${mydata[rid][m].Offline.Location.replace("results", "measurements")}/`;
+                // A temporary key value from summary_results.json is taken as server_precision_info
+                // To be included in summary_results.json
+                let offline_precision_info = mydata[rid][m].Offline.compliance;
+                let extra_model_info = `Weight data types: ${offline_precision_info}
+Input data types: ${offline_precision_info}`;
+            
+                html += `
+                    <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Offline.Location}"> ${Math.round(mydata[rid][m].Offline.Performance_Result * 10) / 10} </a> </td>
+                `;
+            }else {
+                html += `<td></td>`;
+                if (!m.includes("3d-unet")) {
+                    html += `<td></td>`;
+                }
+            }
+        });
+        html += `</tr>`;
+    }
+    // html += "</table>";
+    
+    console.log(html)
+
+    return html
+}
+
+
+
+    
+//     data.forEach(item => {
+//         console.log(item.ID)
+//         let extra_sys_info = `
+//             Processor: ${item.Processor}
+//             Software: ${item.Software}
+//             Cores per processor: ${item.host_processor_core_count}
+//             Processors per node: ${item.host_processors_per_node}
+//             Nodes: ${item.Nodes}
+//             Notes: ${item.Notes}
+//         `;
+//         let a_num = item['a#'] || '';
+//         let acc = a_num === '' ? "" : `${item.Accelerator} x ${parseInt(a_num)}`;
+//         let system_json_link = item.Details.replace("results", "systems").replace("submissions_inference_4.0", "inference_results_v4.0") + ".json";
+//         html += `
+//         <tr>
+//             <td class="col-id headcol"> ${item.ID} </td>
+//             <td class="col-system headcol" title="${extra_sys_info}"> <a target="_blank" href="${system_json_link}"> ${item.System} </a> </td>
+//             <td class="col-submitter headcol"> ${item.Submitter} </td>
+//             <td class="col-accelerator headcol"> ${acc} </td>
+//         `;
+//         const models = ["resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"];
+//         /////
+//         models.forEach(m => {
+//             if (item.Model === m) {
+//                 if (item.Scenario === "Server") {
+//                     let github_server_url = `${location_pre}${item.Location.replace("results", "measurements")}/`;
+//                     // A temporary key value from summary_results.json is taken as server_precision_info
+//                     // To be included in summary_results.json
+//                     let server_precision_info = item.compliance;
+//                     let extra_model_info = `Weight data types: ${server_precision_info}
+// Input data types: ${server_precision_info}`;
+                    
+//                     html += `
+//                         <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${item.Location}"> ${Math.round(item.Performance_Result * 10) / 10} </a> </td>
+//                     `;
+//                 }
+//                 let github_offline_url = `${location_pre}${item.Location.replace("results", "measurements")}/`;
+//                 // A temporary key value from summary_results.json is taken as server_precision_info
+//                 // To be included in summary_results.json
+//                 let offline_precision_info = item.compliance;
+//                 let extra_model_info = `Weight data types: ${offline_precision_info}
+// Input data types: ${offline_precision_info}`;
+                
+//                 html += `
+//                 <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${item[m].Offline.Location}"> ${Math.round(item.Performance_Result * 10) / 10} </a> </td>
+//                 `;
+//             } else {
+//                 html += `<td></td>`;
+//                 if (!m.includes("3d-unet")) {
+//                     html += `<td></td>`;
+//                 }
+//             }
+//         });
+
+//         html += `</tr>`;
+//     });
+
+
+
+function processData(data, category, division, availability) {
+    const myData = {};
+    const neededKeysModel = ["has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location"];
+    const neededKeysSystem = ["System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details", "Platform"];
+    
+    data.forEach(item => {
+        if (item.Suite !== category.toLowerCase()) {
+            return;
+        }
+        if (item.Category !== division.toLowerCase()) {
+            return;
+        }
+        if (item.Availability !== availability.toLowerCase()) {
+            return;
+        }
+
+        const myId = item.ID;
+        if (!myData[myId]) {
+            myData[myId] = {};
+        }
+
+        const model = item.Model;
+        if (!myData[myId][model]) {
+            myData[myId][model] = {};
+        }
+
+        const scenario = item.Scenario;
+        if (!myData[myId][model][scenario]) {
+            myData[myId][model][scenario] = {};
+        }
+
+        myData[myId][model][scenario].has_power = item.has_power;
+        if (item.has_power && item.Power_Result) {
+            myData[myId][model][scenario].Power_Result = item.Power_Result;
+            myData[myId][model][scenario].Power_Units = item.Power_Units;
+        }
+
+        neededKeysModel.forEach(key => {
+            myData[myId][model][scenario][key] = item[key];
+        });
+
+        neededKeysSystem.forEach(key => {
+            myData[myId][key] = item[key];
+        });
+    });
+    return myData;
+}
+
+
+// function to filter data in according to the user selection
+function filterData(category, division, with_power, availability, data) {
+    const result = []; // Initialize an empty object to hold the filtered results
+
+    data.forEach(item => {
+        // the key value pair mapping in summary_results.json is a bit different. please refer to it.
+        console.log(`category is: ${item.Category} and division is ${typeof with_power}`);
+        const categoryMatch = item.Category === division.toLowerCase();
+        const divisionMatch = item.Suite === category.toLowerCase(); 
+        const availabilityMatch = item.Availability == availability.toLowerCase();
+        // Determine if the item should be included based on with_power
+        let powerMatch;
+        if (with_power === "true") {
+            powerMatch = item.hasOwnProperty('Power_Result'); // Check for the key
+        } else {
+            powerMatch = !item.hasOwnProperty('Power_Result'); // Check for absence of the key
+        }
+
+        // If all conditions match, add the item to the result object
+        if (categoryMatch && divisionMatch && powerMatch && availabilityMatch) {
+            result.push({ ...item }); // Use spread operator to copy the item
+        }
+    });
+
+    return result;
+}
+
+function fetchSummaryData() {
+    // Open (or create) the database
+    var request = indexedDB.open("MyDatabase", 1);
+
+    request.onupgradeneeded = function(event) {
+        var db = event.target.result;
+
+        // Create an object store named "myStore" with "Location" as the keyPath
+        if (!db.objectStoreNames.contains("myStore")) {
+            var objectStore = db.createObjectStore("myStore", { autoIncrement: true });
+        }
+        fetchAndStoreData(db);
+    };
+
+    request.onsuccess = function(event) {
+        var db = event.target.result;
+
+        // Fetch the JSON data from the URL and store it in IndexedDB
+        //fetchAndStoreData(db);
+    };
+
+    request.onerror = function(event) {
+        console.error("Error opening IndexedDB: " + event.target.errorCode);
+    };
+}
+
+function fetchAndStoreData(db) {
+    $.getJSON("https://raw.githubusercontent.com/GATEOverflow/inference_results_v4.0/main/summary_results.json", function(data) {
+        // Begin a transaction to save data in IndexedDB
+        var transaction = db.transaction(["myStore"], "readwrite");
+        var objectStore = transaction.objectStore("myStore");
+
+        var count = 0;
+        for(i = 0; i < data.length; i++) {
+            item = data[i];
+            var request = objectStore.add(item);
+            request.onsuccess = function(event) {
+                if(i % 1000 === 0)
+                console.log("Data has been added to your database, record:", i+1);
+            };
+
+            request.onerror = function(event) {
+                //console.error("Error adding data: " + event.target.errorCode+ event.target);
+                //console.log(item);
+            };
+        }
+
+        transaction.oncomplete = function() {
+            console.log("All data has been successfully added to IndexedDB.");
+        };
+
+        transaction.onerror = function(event) {
+           // console.error("Transaction error: " + event.target.errorCode);
+        };
+    }).fail(function(jqxhr, textStatus, error) {
+        console.error("Request Failed: " + textStatus + ", " + error);
+    });
+}
+
+// read all data from database
+function readAllData() {
+    return new Promise((resolve, reject) => {
+        // Open the database
+        var request = indexedDB.open("MyDatabase", 1);
+
+        request.onsuccess = function(event) {
+            var db = event.target.result;
+            var transaction = db.transaction(["myStore"], "readonly");
+            var objectStore = transaction.objectStore("myStore");
+
+            // Open a cursor to iterate through all records
+            var data = [];
+            var cursorRequest = objectStore.openCursor();
+
+            cursorRequest.onsuccess = function(event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    data.push(cursor.value); // Push each record to the data array
+                    cursor.continue(); // Move to the next record
+                } else {
+                    resolve(data); // Resolve the promise with the data array when done
+                }
+            };
+
+            cursorRequest.onerror = function(event) {
+                reject("Error reading data: " + event.target.errorCode);
+            };
+        };
+
+        request.onerror = function(event) {
+            reject("Error opening IndexedDB: " + event.target.errorCode);
+        };
+    });
+}
+
 // Extend the themes to change any of the default class names ** NEW **
 $.extend($.tablesorter.themes.jui, {
     // change default jQuery uitheme icons - find the full list of icons
