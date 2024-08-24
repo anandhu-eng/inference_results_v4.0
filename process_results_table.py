@@ -157,6 +157,7 @@ def processdata(data, category, division, availability):
 models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
 
 def get_precision_info(measurements_url, platform):
+    return {'weight_data_types': '', 'input_data_types': ''}
     github_url  = measurements_url
     measurements_json_file_name =  find_match(get_json_files(github_url), f"""^{platform}.*\\.json$""")
     measurements_json = f"""{github_url}{measurements_json_file_name}"""

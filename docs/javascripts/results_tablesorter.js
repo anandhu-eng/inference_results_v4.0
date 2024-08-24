@@ -1267,7 +1267,7 @@ function constructTable(category, division, with_power, availability, data) {
             <td class="col-submitter headcol"> ${mydata[rid].Submitter} </td>
             <td class="col-accelerator headcol"> ${acc} </td>
         `;
-        const models = ["resnet", "retinanet", "bert-99", "bert-99.9", "gptj-99", "gptj-99.9", "llama2-70b-99", "llama2-70b-99.9", "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "3d-unet-99", "3d-unet-99.9"];
+        const models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanett", "resnet50", "3d-unet-99", "3d-unet-99.9"];
         models.forEach(m => {
             if (mydata[rid][m]) {
                 if (mydata[rid][m].Server) {
