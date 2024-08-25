@@ -1029,7 +1029,7 @@ $(document).ready(function() {
         //console.log(with_power[0]);
         var data;
         readAllData().then(function(allData) {
-          //  console.log(allData);
+            //  console.log(allData);
             reConstructTables(category, division, with_power[0], allData);
         }).catch(function(error) {
             console.error(error);
@@ -1124,7 +1124,7 @@ function constructSummaryTable(data, category, division, with_power) {
     const [summaryData, countData] = getSummaryData(data, category, division, with_power);
     let html = ``
     if (category == "datacenter") {
-    html += `
+        html += `
         <thead>
         <tr>
         <th class="count-submitter">Submitter</th>
@@ -1147,7 +1147,7 @@ function constructSummaryTable(data, category, division, with_power) {
     `;
     }
     else {
-    html += `
+        html += `
         <thead>
         <tr>
         <th class="count-submitter">Submitter</th>
@@ -1166,12 +1166,12 @@ function constructSummaryTable(data, category, division, with_power) {
     }
     const totalCounts = {};
     models = [];
-        if (category == "datacenter") {
-            models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
-        }
-        else{
-            models = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
-        }
+    if (category == "datacenter") {
+        models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
+    }
+    else{
+        models = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"];
+    }
     for (const submitter in countData) {
         html += "<tr>";
         let cnt = 0;
@@ -1207,61 +1207,96 @@ function constructSummaryTable(data, category, division, with_power) {
     html += "</tr>";
     return html
 }
-
+/*
+function get_scenario_td_data(data, scenario) {
+                if (data.Scenario) {
+                    let github_server_url = `${location_pre}${data.Server.Location.replace("results", "measurements")}/`;
+                    // A temporary key value from summary_results.json is taken as server_precision_info
+                    // To be included in summary_results.json
+                    let server_precision_info = $data.Server.compliance;
+                    let extra_model_info = `Weight data types: ${server_precision_info}
+Input data types: ${server_precision_info}`;
+                    html += `
+                        <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Server.Location}"> ${Math.round(mydata[rid][m].Server.Performance_Result * 10) / 10} </a> </td>
+                    `;
+                    if (with_power) {
+                    }
+                }
+}
+*/
 function constructTable(category, division, with_power, availability, data) {
     let html = ``;
     // Table header
     html += `<thead> <tr>`
     let tableheader = ``;
+    console.log(with_power);
     if (category == "datacenter") {
+        if (with_power) {
+            colspan = 6;
+            colspan_single = 3;
+            model_header = `
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Power</th>
+        <th class="col-scenario">Samples/J</th>
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Power</th>
+        <th class="col-scenario">Samples/J</th>
+        `;
+            model_header_single = `
+        <th class="col-scenario">Offline</th>
+        <th class="col-scenario">Power</th>
+        <th class="col-scenario">Samples/J</th>
+        `;
+        }
+        else {
+            colspan = 2;
+            colspan_single = 1;
+            model_header = `
+        <th class="col-scenario">Server</th>
+        <th class="col-scenario">Offline</th>
+        `;
+            model_header_single = `
+        <th class="col-scenario">Offline</th>
+        `;
+        }
+
         tableheader = `
         <th id="col-id" class="headcol col-id">ID</th>
         <th id="col-system" class="headcol col-system">System</th>
         <th id="col-submitter" class="headcol col-submitter">Submitter</th>
         <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
-        <th id="col-llama2-99" colspan="2">LLAMA2-70B-99</th>
-        <th id="col-llama2-99.9" colspan="2">LLAMA2-70B-99.9</th>
-        <th id="col-gptj-99" colspan="2">GPTJ-99</th>
-        <th id="col-gptj-99.9" colspan="2">GPTJ-99.9</th>
-        <th id="col-bert-99" colspan="2">Bert-99</th>
-        <th id="col-bert-99.9" colspan="2">Bert-99.9</th>
-        <th id="col-dlrm-v2-99" colspan="2">Stable Diffusion</th>
-        <th id="col-dlrm-v2-99" colspan="2">DLRM-v2-99</th>
-        <th id="col-dlrm-v2-99.9" colspan="2">DLRM-v2-99.9</th>
-        <th id="col-retinanet" colspan="2">Retinanet</th>
-        <th id="col-resnet50" colspan="2">ResNet50</th>
-        <th id="col-3d-unet-99" colspan="1">3d-unet-99</th>
-        <th id="col-3d-unet-99.9" colspan="1">3d-unet-99.9</th>
+        <th id="col-llama2-99" colspan="${colspan}">LLAMA2-70B-99</th>
+        <th id="col-llama2-99.9" colspan="${colspan}">LLAMA2-70B-99.9</th>
+        <th id="col-gptj-99" colspan="${colspan}">GPTJ-99</th>
+        <th id="col-gptj-99.9" colspan="${colspan}">GPTJ-99.9</th>
+        <th id="col-bert-99" colspan="${colspan}">Bert-99</th>
+        <th id="col-bert-99.9" colspan="${colspan}">Bert-99.9</th>
+        <th id="col-dlrm-v2-99" colspan="${colspan}">Stable Diffusion</th>
+        <th id="col-dlrm-v2-99" colspan="${colspan}">DLRM-v2-99</th>
+        <th id="col-dlrm-v2-99.9" colspan="${colspan}">DLRM-v2-99.9</th>
+        <th id="col-retinanet" colspan="${colspan}">Retinanet</th>
+        <th id="col-resnet50" colspan="${colspan}">ResNet50</th>
+        <th id="col-3d-unet-99" colspan="${colspan_single}">3d-unet-99</th>
+        <th id="col-3d-unet-99.9" colspan="${colspan_single}">3d-unet-99.9</th>
     </tr>
     <tr>
         <th class="headcol col-id"></th>
         <th class="headcol col-system"></th>
         <th class="headcol col-submitter"></th>
         <th class="headcol col-accelerator"></th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Server</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Offline</th>
-        <th class="col-scenario">Offline</th>
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header}
+        ${model_header_single}
+        ${model_header_single}
     `;
     }
     else {
@@ -1356,6 +1391,15 @@ Input data types: ${server_precision_info}`;
                     html += `
                         <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Server.Location}"> ${Math.round(mydata[rid][m].Server.Performance_Result * 10) / 10} </a> </td>
                     `;
+                    if (with_power) {
+                    html += `
+                        <td class="col-result" title="${mydata[rid][m].Server.Power_Units}"> ${Math.round(mydata[rid][m].Server.Power_Result * 10) / 10} </td>`;
+                    let samples_per_joule = (mydata[rid][m].Server.Performance_Result / mydata[rid][m].Server.Power_Result).toFixed(4);
+                    html += `
+                        <td class="col-result" title="Samples per Joules"> ${samples_per_joule}</td>
+                    `;
+
+                    }
                 }
                 let github_offline_url = `${location_pre}${mydata[rid][m].Offline.Location.replace("results", "measurements")}/`;
                 // A temporary key value from summary_results.json is taken as server_precision_info
@@ -1367,6 +1411,17 @@ Input data types: ${offline_precision_info}`;
                 html += `
                     <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Offline.Location}"> ${Math.round(mydata[rid][m].Offline.Performance_Result * 10) / 10} </a> </td>
                 `;
+                    if (with_power) {
+                    html += `
+                        <td class="col-result" title="${mydata[rid][m].Offline.Power_Units}"> ${mydata[rid][m].Offline.Power_Result.toFixed(2)} </td>`;
+                    let samples_per_joule = (mydata[rid][m].Offline.Performance_Result / mydata[rid][m].Offline.Power_Result).toFixed(4);
+                    //let samples_per_joule = (mydata[rid][m].Offline.Performance_Result / mydata[rid][m].Offline.Power_Result);
+                    console.log(samples_per_joule);
+                    html += `
+                        <td class="col-result" title="Samples per Joules"> ${samples_per_joule}</td>
+                    `;
+
+                    }
                 if (mydata[rid][m].SingleStream) {
                     let github_ss_url = `${location_pre}${mydata[rid][m].SingleStream.Location.replace("results", "measurements")}/`;
                     // A temporary key value from summary_results.json is taken as server_precision_info
@@ -1391,13 +1446,21 @@ Input data types: ${ms_precision_info}`;
                 }
             }else {
                 html += `<td></td>`;
+                if (with_power) {
+                html += `<td></td>`;
+                html += `<td></td>`;
+                }
                 if (!m.includes("3d-unet") || category == "edge") 
                 {
                     html += `<td></td>`;
+                html += `<td></td>`;
+                html += `<td></td>`;
                 }
-                if (m.includes("retinanet") || m.includes("resnet")) 
+                if ((m.includes("retinanet") || m.includes("resnet")) && (category == "edge")) 
                 {
                     html += `<td></td>`;
+                html += `<td></td>`;
+                html += `<td></td>`;
                 }
             }
         });
