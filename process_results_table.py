@@ -171,7 +171,7 @@ def get_precision_info(measurements_url, platform):
 
 def construct_table(category, division, availability):
     # Initialize the HTML table with the header
-    html = f"""<div id="results_table_{availability}" class="resultstable_wrapper"> <table class="resultstable tablesorter" id="results_{availability}">"""
+    html = f"""<div id="results_table_{availability}" class="resultstable_wrapper"> <table class="resultstable tablesorter tableclosed tabledatacenter" id="results_{availability}">"""
     html += "<thead> <tr>"
     
     # Table header
@@ -426,7 +426,7 @@ def generate_html_form(categories, divisions, selected_category=None, selected_d
             <label for="with_power">Power</label>
             <select id="with_power" name="with_power" class="col">
                 <option value="true" {'selected' if with_power == 'true' else ''}>Performance and Power</option>
-                <option value="false" {'selected' if with_power == 'false' else ''}>Performance only</option>
+                <option value="false" {'selected' if with_power == 'false' else ''}>Performance</option>
             </select>
         </div>
 
@@ -451,7 +451,7 @@ for availability in availabilities:
 
     if html_table:
         html += f"""
-        <h2 id="results_heading_{availability.lower()}">{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
+        <h2 id="results_heading_{availability.lower()}" class="results_table_heading">{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
 {tableposhtmlval}
 {html_table}
 {tableposhtmlval}

@@ -1042,7 +1042,10 @@ $(document).ready(function() {
         //console.log(category);
         //console.log(division);
         //console.log(with_power[0]);
-        var data;
+        $(".resultstable").hide();
+        $(".results_table_heading").text("");
+        $(".pager").hide();
+
         readAllData().then(function(allData) {
             //  console.log(allData);
             reConstructTables(category, division, with_power[0], allData);
@@ -1296,7 +1299,7 @@ function constructOpenTableModel(model, category, with_power, availability, myda
 
     html = `
     <h4>${model}</h4>
-    <table class="resultstable tablesorter" id="results_${model}_${availability}">`;
+    <table class="resultstable tablesorter tableopen table${category}" id="results_${model}_${availability}">`;
     html += `<thead> <tr>`
     if (category == "datacenter") {
         if (with_power) {
@@ -1557,7 +1560,7 @@ function constructTable(category, division, with_power, availability, data) {
         //console.log(html);
         return html;
     }
-    html += `<table class="resultstable tablesorter" id="results_${availability}"`
+    html += `<table class="resultstable tablesorter tableclosed table${category}" id="results_${availability}">`
     // Table header
     html += `<thead> <tr>`
     let tableheader = ``;
