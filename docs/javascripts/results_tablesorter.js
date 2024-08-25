@@ -1352,29 +1352,6 @@ function constructOpenTableModel(model, category, with_power, availability, myda
         `;
         }
 
-        /*  tableheader = `
-        <th id="col-id" class="headcol col-id">ID</th>
-        <th id="col-system" class="headcol col-system">System</th>
-        <th id="col-submitter" class="headcol col-submitter">Submitter</th>
-        <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
-        <th id="col-model" colspan="${colspan}">${model}</th>
-    </tr><tr>
-    */
-        tableheader = `
-        <th class="headcol col-id">ID</th>
-        <th class="headcol col-system">System</th>
-        <th class="headcol col-submitter">Submitter</th>
-        <th class="headcol col-accelerator">Accelerator</th>
-        ${model_header}
-        </tr>
-        <tr>
-        <th class="headcol col-id"></th>
-        <th class="headcol col-system"></th>
-        <th class="headcol col-submitter"></th>
-        <th class="headcol col-accelerator"></th>
-        ${model_header_2}
-
-    `;
     }
     else {
         if (with_power) {
@@ -1428,28 +1405,13 @@ function constructOpenTableModel(model, category, with_power, availability, myda
         `;
             }
         }
-        /*
-        tableheader = `
-        <th id="col-id" class="headcol col-id">ID</th>
-        <th id="col-system" class="headcol col-system">System</th>
-        <th id="col-submitter" class="headcol col-submitter">Submitter</th>
-        <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
-        <th id="col-gptj-99" colspan="${colspan}">GPTJ-99</th>
-        <th id="col-gptj-99.9" colspan="${colspan}">GPTJ-99.9</th>
-        <th id="col-bert-99" colspan="${colspan}">Bert-99</th>
-        <th id="col-dlrm-v2-99" colspan="${colspan}">Stable Diffusion</th>
-        <th id="col-retinanet" colspan="${colspan_ms}">Retinanet</th>
-        <th id="col-resnet50" colspan="${colspan_ms}">ResNet50</th>
-        <th id="col-3d-unet-99" colspan="${colspan}">3d-unet-99</th>
-        <th id="col-3d-unet-99.9" colspan="${colspan}">3d-unet-99.9</th>
-        <th id="col-rnnt" colspan="${colspan}">RNNT</th>
-    </tr>
-    <tr>*/
-        tableheader = `
+    }
+    tableheader = `
         <th class="headcol col-id">ID</th>
         <th class="headcol col-system">System</th>
         <th class="headcol col-submitter">Submitter</th>
         <th class="headcol col-accelerator">Accelerator</th>
+        <th class="headcol col-usedmodel">Model</th>
         ${model_header}
         </tr>
         <tr>
@@ -1457,9 +1419,9 @@ function constructOpenTableModel(model, category, with_power, availability, myda
         <th class="headcol col-system"></th>
         <th class="headcol col-submitter"></th>
         <th class="headcol col-accelerator"></th>
+        <th class="headcol col-usedmodel">Model</th>
         ${model_header_2}
     `;
-    }
     html += tableheader;
     html += `</tr></thead>`;
     if(needsFooter) {
@@ -1492,6 +1454,10 @@ function constructOpenTableModel(model, category, with_power, availability, myda
             <td class="col-submitter headcol"> ${mydata[rid].Submitter} </td>
             <td class="col-accelerator headcol"> ${acc} </td>
         `;
+        if(mydata[rid][model].hasOwnProperty("Offline")) {
+            html += `<td class="col-usedmodel headcol"> ${mydata[rid][model]["Offline"].UsedModel} </td>`;
+        //console.log(mydata[rid][model]["Offline"]);
+        }
 
 
 
@@ -1831,7 +1797,7 @@ function constructTable(category, division, with_power, availability, data) {
 
 function processData(data, category, division, availability) {
     const myData = {};
-    const neededKeysModel = ["has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location", "weight_data_types"];
+    const neededKeysModel = ["has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location", "weight_data_types", "UsedModel"];
     const neededKeysSystem = ["System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details", "Platform"];
 
     data.forEach(item => {
