@@ -1258,7 +1258,12 @@ function get_scenario_td_data(data, scenario, with_power) {
             samples_per_joule = (samples_per_query / (data[scenario].Performance_Result * data[scenario].Power_Result));
         }
         if(samples_per_joule < 1) {
-            samples_per_joule = samples_per_joule.toFixed(6);
+            digits = 2;
+            do {
+                temp = samples_per_joule.toFixed(digits);
+                digits++;
+            }while(temp == 0);
+            samples_per_joule = temp;
         }
         else {
             samples_per_joule = samples_per_joule.toFixed(2);
@@ -1277,6 +1282,7 @@ function constructTable(category, division, with_power, availability, data) {
     if (!Object.keys(mydata).length) {
         return null; // return if mydata is null
     }
+    var needsFooter = Object.keys(mydata).length > 5;
     // Table header
     html += `<thead> <tr>`
     let tableheader = ``;
@@ -1479,8 +1485,10 @@ function constructTable(category, division, with_power, availability, data) {
     `;
     }
     html += tableheader;
-    html += `</tr></thead>`
-    html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
+    html += `</tr></thead>`;
+    if(needsFooter) {
+        html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
+    }
     //console.log("here")
 
 
