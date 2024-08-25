@@ -1009,10 +1009,20 @@ $('table')
     });
 
 var scenarioUnits = {};
+var accuracyUnits = {};
 var validScenarios = {
     "edge":  [ "Offline", "SingleStream", "MultiStream" ],
     "datacenter": [ "Server", "Offline" ]
 }
+
+models_datacenter = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
+
+models_edge = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
+
+const dbName = "mlperf_inference";
+const dbVersion = 3;
+const objStore = "inference_results";
+
 
 $(document).ready(function() {
     //console.log('Document is ready');
@@ -1054,7 +1064,7 @@ function reConstructTables(category, division, with_power, data){
         var html_table = constructTable(category, division, with_power, availability, filteredResults);
         var tableHeading = `${category} Category: ${availability} submissions in ${division} division`;
         // replacing the old table with the newly constructed one
-        var elemIdTable = `results_${availability.toLowerCase()}` 
+        var elemIdTable = `results_table_${availability.toLowerCase()}` 
         var elemIdTableHeading = `results_heading_${availability.toLowerCase()}`
         if (html_table) {
             document.getElementById(elemIdTable).innerHTML = html_table;
@@ -1177,10 +1187,10 @@ function constructSummaryTable(data, category, division, with_power) {
     const totalCounts = {};
     models = [];
     if (category == "datacenter") {
-        models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
+        models = models_datacenter;
     }
     else{
-        models = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
+        models = models_edge;
     }
     for (const submitter in countData) {
         html += "<tr>";
@@ -1218,23 +1228,28 @@ function constructSummaryTable(data, category, division, with_power) {
     return html
 }
 
-function get_scenario_td_data(data, scenario, with_power) {
+function get_scenario_td_data(data, scenario, with_power, accuracy=false) {
     let location_pre = `https://github.com/mlcommons/inference_results_v4.0/tree/main/`;
     let result_link_text = ``;
 
     if(!data || !data.hasOwnProperty(scenario)) {
+        td_data = "<td></td>";
+        if(accuracy) {
+            td_data += "<td></td>";
+        }
         if (with_power) {
-            return "<td></td><td></td><td></td>";
+            td_data += "<td></td><td></td>";
         }
-        else {
-            return "<td></td>";
-        }
+        return td_data;
     }
 
     let html = ``;
     let precision_info = data[scenario].weight_data_types;
     let extra_model_info = `Model precision: ${precision_info}`;
-
+    //console.log(data);
+    if(accuracy) {
+        html += `<td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${data[scenario].Location}"> ${data[scenario].Accuracy_Values} </a> </td>`;
+    }
     html += `<td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${data[scenario].Location}"> ${data[scenario].Performance_Result.toFixed(2)} </a> </td>`;
 
     if (with_power) {
@@ -1276,6 +1291,260 @@ function get_scenario_td_data(data, scenario, with_power) {
     return html;
 }
 
+function constructOpenTableModel(model, category, with_power, availability, mydata, needsFooter=false) {
+    //mydata = filterModel(data, model);
+
+    html = `
+    <h4>${model}</h4>
+    <table class="resultstable tablesorter" id="results_${model}_${availability}">`;
+    html += `<thead> <tr>`
+    if (category == "datacenter") {
+        if (with_power) {
+            colspan = 8;
+            colspan_single = 4;
+            model_header = `
+        <th class="col-scenario" colspan="4">Server</th>
+        <th class="col-scenario" colspan="4">Offline</th>
+        `;
+            //console.log(scenarioUnits);
+            model_header_2 = `
+        <th class="col-scenario">Accuracy</th>
+        <th class="col-scenario">${scenarioUnits['Server']['Performance_Units']}</th>
+        <th class="col-scenario">${scenarioUnits['Server']['Power_Units']}</th>
+        <th class="col-scenario">Samples/J</th>
+        <th class="col-scenario">Accuracy</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Performance_Units']}</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Power_Units']}</th>
+        <th class="col-scenario">Samples/J</th>
+        `;
+            model_header_single = `
+        <th class="col-scenario" colspan="${colspan_single}">Offline</th>
+        `;
+            model_header_single_2 = `
+        <th class="col-scenario">Accuracy</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Performance_Units']}</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Power_Units']}</th>
+        <th class="col-scenario">Samples/J</th>
+        `;
+        }
+        else {
+            colspan = 4;
+            colspan_single = 2;
+            model_header = `
+        <th class="col-scenario" colspan="2">Server</th>
+        <th class="col-scenario" colspan="2">Offline</th>
+        `;
+            model_header_2 = `
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['Server']['Performance_Units']}</th>
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Performance_Units']}</th>
+        `;
+            model_header_single = `
+        <th class="col-scenario">Offline</th>
+        `;
+            model_header_single_2 = `
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Performance_Units']}</th>
+        `;
+        }
+
+        /*  tableheader = `
+        <th id="col-id" class="headcol col-id">ID</th>
+        <th id="col-system" class="headcol col-system">System</th>
+        <th id="col-submitter" class="headcol col-submitter">Submitter</th>
+        <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
+        <th id="col-model" colspan="${colspan}">${model}</th>
+    </tr><tr>
+    */
+        tableheader = `
+        <th class="headcol col-id">ID</th>
+        <th class="headcol col-system">System</th>
+        <th class="headcol col-submitter">Submitter</th>
+        <th class="headcol col-accelerator">Accelerator</th>
+        ${model_header}
+        </tr>
+        <tr>
+        <th class="headcol col-id"></th>
+        <th class="headcol col-system"></th>
+        <th class="headcol col-submitter"></th>
+        <th class="headcol col-accelerator"></th>
+        ${model_header_2}
+
+    `;
+    }
+    else {
+        if (with_power) {
+            colspan = 6;
+            colspan_ms = 9;
+            model_header = `
+        <th class="col-scenario" colspan="4">Offline</th>
+        <th class="col-scenario" colspan="4">SingleStream</th>
+        `;
+            //console.log(scenarioUnits);
+            model_header_2 = `
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Performance_Units']}</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Power_Units']}</th>
+        <th class="col-scenario">Samples/J</th>
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['SingleStream']['Performance_Units']}</th>
+        <th class="col-scenario">${scenarioUnits['SingleStream']['Power_Units']}</th>
+        <th class="col-scenario">Samples/J</th>
+        `;
+            model_header_ms = model_header + `
+        <th class="col-scenario" colspan="4">MultiStream</th>
+        `;
+            model_header_ms_2 = model_header_2 + `
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['MultiStream']['Performance_Units']}</th>
+        <th class="col-scenario">${scenarioUnits['MultiStream']['Power_Units']}</th>
+        <th class="col-scenario">Samples/J</th>
+        `;
+        }
+        else {
+            colspan = 2;
+            colspan_ms = 6;
+            model_header = `
+        <th class="col-scenario" colspan="${colspan}">Offline</th>
+        <th class="col-scenario" colspan="${colspan}">SingleStream</th>
+        `;
+            model_header_2 = `
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['Offline']['Performance_Units']}</th>
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['SingleStream']['Performance_Units']}</th>
+        `;
+            if(model.includes("resnet") || model.includes("retinanet")) {
+            model_header = model_header + `
+        <th class="col-scenario" colspan="${colspan}">MultiStream</th>
+        `;
+            model_header_2 = model_header_2 + `
+        <th class="col-scenario">${accuracyUnits[model]}</th>
+        <th class="col-scenario">${scenarioUnits['MultiStream']['Performance_Units']}</th>
+        `;
+            }
+        }
+        /*
+        tableheader = `
+        <th id="col-id" class="headcol col-id">ID</th>
+        <th id="col-system" class="headcol col-system">System</th>
+        <th id="col-submitter" class="headcol col-submitter">Submitter</th>
+        <th id="col-accelerator" class="headcol col-accelerator">Accelerator</th>
+        <th id="col-gptj-99" colspan="${colspan}">GPTJ-99</th>
+        <th id="col-gptj-99.9" colspan="${colspan}">GPTJ-99.9</th>
+        <th id="col-bert-99" colspan="${colspan}">Bert-99</th>
+        <th id="col-dlrm-v2-99" colspan="${colspan}">Stable Diffusion</th>
+        <th id="col-retinanet" colspan="${colspan_ms}">Retinanet</th>
+        <th id="col-resnet50" colspan="${colspan_ms}">ResNet50</th>
+        <th id="col-3d-unet-99" colspan="${colspan}">3d-unet-99</th>
+        <th id="col-3d-unet-99.9" colspan="${colspan}">3d-unet-99.9</th>
+        <th id="col-rnnt" colspan="${colspan}">RNNT</th>
+    </tr>
+    <tr>*/
+        tableheader = `
+        <th class="headcol col-id">ID</th>
+        <th class="headcol col-system">System</th>
+        <th class="headcol col-submitter">Submitter</th>
+        <th class="headcol col-accelerator">Accelerator</th>
+        ${model_header}
+        </tr>
+        <tr>
+        <th class="headcol col-id"></th>
+        <th class="headcol col-system"></th>
+        <th class="headcol col-submitter"></th>
+        <th class="headcol col-accelerator"></th>
+        ${model_header_2}
+    `;
+    }
+    html += tableheader;
+    html += `</tr></thead>`;
+    if(needsFooter) {
+        html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
+    }
+    //console.log("here")
+
+    validData = false
+    for (let rid in mydata) {
+        if (!mydata[rid].hasOwnProperty(model)) {
+            continue
+        }
+        validData = true
+        let extra_sys_info = `
+            Processor: ${mydata[rid].Processor}
+            Software: ${mydata[rid].Software}
+            Cores per processor: ${mydata[rid].host_processor_core_count}
+            Processors per node: ${mydata[rid].host_processors_per_node}
+            Nodes: ${mydata[rid].Nodes}
+            Notes: ${mydata[rid].Notes}
+        `;
+
+        let a_num = mydata[rid]['a#'] || '';
+        let acc = a_num === '' ? "" : `${mydata[rid].Accelerator} x ${parseInt(a_num)}`;
+        let system_json_link = mydata[rid].Details.replace("results", "systems").replace("submissions_inference_4.0", "inference_results_v4.0") + ".json";
+        html += `
+        <tr>
+            <td class="col-id headcol"> ${rid} </td>
+            <td class="col-system headcol" title="${extra_sys_info}"> <a target="_blank" href="${system_json_link}"> ${mydata[rid].System} </a> </td>
+            <td class="col-submitter headcol"> ${mydata[rid].Submitter} </td>
+            <td class="col-accelerator headcol"> ${acc} </td>
+        `;
+
+
+
+        if (category == "datacenter") {
+            if (!model.includes("3d-unet")) { 
+                scenario_data = get_scenario_td_data(mydata[rid][model], "Server", with_power, true);
+                html += scenario_data;
+            }
+            scenario_data = get_scenario_td_data(mydata[rid][model], "Offline", with_power, true);
+            html += scenario_data;
+        }
+        else {
+            scenario_data = get_scenario_td_data(mydata[rid][model], "Offline", with_power, true);
+            html += scenario_data;
+            scenario_data = get_scenario_td_data(mydata[rid][model], "SingleStream", with_power, true);
+            html += scenario_data;
+            if (model.includes("retinanet") || model.includes("resnet")) {
+                scenario_data = get_scenario_td_data(mydata[rid][model], "MultiStream", with_power, true);
+                html += scenario_data;
+            }
+        }
+        html += `</tr>`;
+    }
+    if(!validData) {
+        html = ''
+    }
+    else {
+    html += `</table>`;
+    }
+
+    //console.log(html);
+    return html;
+}
+function constructOpenTable(category, with_power, availability, data) {
+    models = []
+    if (category == "datacenter") {
+        models = models_datacenter;
+    }
+    else{
+        models = models_edge;
+    }
+    html = ''
+    models.forEach(function(model, index) {
+        html += constructOpenTableModel(model, category, with_power, availability, data);
+    });
+    //console.log(with_power);
+    // html += "</table>";
+
+    //console.log(html)
+
+    return html
+}
+
+
+
+
 function constructTable(category, division, with_power, availability, data) {
     let html = ``;
     var mydata = processData(data, category, division, availability)
@@ -1283,6 +1552,12 @@ function constructTable(category, division, with_power, availability, data) {
         return null; // return if mydata is null
     }
     var needsFooter = Object.keys(mydata).length > 5;
+    if(division == "open") {
+        html =  constructOpenTable(category, with_power, availability, mydata);
+        //console.log(html);
+        return html;
+    }
+    html += `<table class="resultstable tablesorter" id="results_${availability}"`
     // Table header
     html += `<thead> <tr>`
     let tableheader = ``;
@@ -1514,10 +1789,10 @@ function constructTable(category, division, with_power, availability, data) {
         `;
         let models = [];
         if (category == "datacenter") {
-            models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9",  "stable-diffusion-xl", "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
+            models = models_datacenter;
         }
         else{
-            models = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
+            models = models_edge;
         }
         models.forEach(m => {
             //console.log(mydata[rid][m]);
@@ -1542,7 +1817,7 @@ function constructTable(category, division, with_power, availability, data) {
         });
         html += `</tr>`;
     }
-    // html += "</table>";
+    html += "</table>";
 
     //console.log(html)
 
@@ -1596,6 +1871,28 @@ function processData(data, category, division, availability) {
             myData[myId][key] = item[key];
         });
 
+        accuracyUnits[model] 
+        acc = item['Accuracy']
+        acc_ = acc.split("  ")
+        acc_units = ""
+        acc_values = ""
+        for(val in acc_) {
+            val_ = acc_[val].split(":")
+            if(acc_units) {
+                acc_units += ","+val_[0]
+                acc_values += ","+ parseFloat(val_[1]).toFixed(4)
+            }
+            else {
+                acc_units = val_[0]
+                acc_values = parseFloat(val_[1]).toFixed(4)
+            }
+        }
+        if (!accuracyUnits.hasOwnProperty(model)) {
+            accuracyUnits[model] = acc_units;
+        }
+        myData[myId][model][scenario]['Accuracy_Values'] = acc_values;
+        //console.log(accuracyUnits);
+
         if (!scenarioUnits.hasOwnProperty(item['Scenario'])) {
             scenarioUnits[item['Scenario']] = {}
             scenarioUnits[item['Scenario']]['Performance_Units'] = item['Performance_Units'];
@@ -1639,9 +1936,6 @@ function filterData(category, division, with_power, availability, data) {
     return result;
 }
 
-const dbName = "mlperf_inference";
-const dbVersion = 3;
-const objStore = "inference_results";
 
 function fetchSummaryData() {
     // Open (or create) the database
