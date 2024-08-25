@@ -1456,7 +1456,15 @@ function constructOpenTableModel(model, category, with_power, availability, myda
         `;
         if(mydata[rid][model].hasOwnProperty("Offline")) {
             html += `<td class="col-usedmodel headcol"> ${mydata[rid][model]["Offline"].UsedModel} </td>`;
-        //console.log(mydata[rid][model]["Offline"]);
+        }
+        else if(mydata[rid][model].hasOwnProperty("Server")) {
+            html += `<td class="col-usedmodel headcol"> ${mydata[rid][model]["Server"].UsedModel} </td>`;
+        }
+        else if(mydata[rid][model].hasOwnProperty("SingleStream")) {
+            html += `<td class="col-usedmodel headcol"> ${mydata[rid][model]["SingleStream"].UsedModel} </td>`;
+        }
+        else if(mydata[rid][model].hasOwnProperty("MultiStream")) {
+            html += `<td class="col-usedmodel headcol"> ${mydata[rid][model]["MultiStream"].UsedModel} </td>`;
         }
 
 
