@@ -1022,7 +1022,7 @@ $(document).ready(function() {
         var category = $('#category option:selected').val();
         var division = $('#division option:selected').val();
         var with_power = $('#with_power option:selected').map(function() {
-            return $(this).val();
+            return $(this).val() == "true";
         }).get();
         //console.log(category);
         //console.log(division);
@@ -1077,7 +1077,7 @@ function getSummaryData(data, category, division, with_power) {
 
         // filtering by power or just performance
         let powerMatch;
-        if (with_power === "true") {
+        if (with_power) {
             powerMatch = item.hasOwnProperty('Power_Result'); // Check for the key
         } else {
             powerMatch = !item.hasOwnProperty('Power_Result'); // Check for absence of the key
@@ -1211,8 +1211,8 @@ function constructSummaryTable(data, category, division, with_power) {
 function get_scenario_td_data(data, scenario) {
                 if (data.Scenario) {
                     let github_server_url = `${location_pre}${data.Server.Location.replace("results", "measurements")}/`;
-                    // A temporary key value from summary_results.json is taken as server_precision_info
-                    // To be included in summary_results.json
+// A temporary key value from summary_results.json is taken as server_precision_info
+// To be included in summary_results.json
                     let server_precision_info = $data.Server.compliance;
                     let extra_model_info = `Weight data types: ${server_precision_info}
 Input data types: ${server_precision_info}`;
@@ -1383,19 +1383,16 @@ function constructTable(category, division, with_power, availability, data) {
                 //console.log(mydata[rid][m]);
                 if (mydata[rid][m].Server) {
                     let github_server_url = `${location_pre}${mydata[rid][m].Server.Location.replace("results", "measurements")}/`;
-                    // A temporary key value from summary_results.json is taken as server_precision_info
-                    // To be included in summary_results.json
-                    let server_precision_info = mydata[rid][m].Server.compliance;
-                    let extra_model_info = `Weight data types: ${server_precision_info}
-Input data types: ${server_precision_info}`;
+                    let server_precision_info = mydata[rid][m].Server.weight_data_types;
+                    let extra_model_info = `Model precision: ${server_precision_info}`;
                     html += `
                         <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Server.Location}"> ${Math.round(mydata[rid][m].Server.Performance_Result * 10) / 10} </a> </td>
                     `;
                     if (with_power) {
-                    html += `
+                        html += `
                         <td class="col-result" title="${mydata[rid][m].Server.Power_Units}"> ${Math.round(mydata[rid][m].Server.Power_Result * 10) / 10} </td>`;
-                    let samples_per_joule = (mydata[rid][m].Server.Performance_Result / mydata[rid][m].Server.Power_Result).toFixed(4);
-                    html += `
+                        let samples_per_joule = (mydata[rid][m].Server.Performance_Result / mydata[rid][m].Server.Power_Result).toFixed(4);
+                        html += `
                         <td class="col-result" title="Samples per Joules"> ${samples_per_joule}</td>
                     `;
 
@@ -1404,14 +1401,15 @@ Input data types: ${server_precision_info}`;
                 let github_offline_url = `${location_pre}${mydata[rid][m].Offline.Location.replace("results", "measurements")}/`;
                 // A temporary key value from summary_results.json is taken as server_precision_info
                 // To be included in summary_results.json
-                let offline_precision_info = mydata[rid][m].Offline.compliance;
-                let extra_model_info = `Weight data types: ${offline_precision_info}
-Input data types: ${offline_precision_info}`;
+                let offline_precision_info = mydata[rid][m].Offline.weight_data_types;
+                let extra_model_info = `Model precision: ${offline_precision_info}`;
 
                 html += `
                     <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].Offline.Location}"> ${Math.round(mydata[rid][m].Offline.Performance_Result * 10) / 10} </a> </td>
                 `;
-                    if (with_power) {
+                if (with_power) {
+                    //console.log(with_power);
+                    console.log(mydata[rid][m])
                     html += `
                         <td class="col-result" title="${mydata[rid][m].Offline.Power_Units}"> ${mydata[rid][m].Offline.Power_Result.toFixed(2)} </td>`;
                     let samples_per_joule = (mydata[rid][m].Offline.Performance_Result / mydata[rid][m].Offline.Power_Result).toFixed(4);
@@ -1421,13 +1419,13 @@ Input data types: ${offline_precision_info}`;
                         <td class="col-result" title="Samples per Joules"> ${samples_per_joule}</td>
                     `;
 
-                    }
+                }
                 if (mydata[rid][m].SingleStream) {
                     let github_ss_url = `${location_pre}${mydata[rid][m].SingleStream.Location.replace("results", "measurements")}/`;
                     // A temporary key value from summary_results.json is taken as server_precision_info
                     // To be included in summary_results.json
-                    let ss_precision_info = mydata[rid][m].SingleStream.compliance;
-                    let extra_model_info = `Weight data types: ${ss_precision_info}
+                    let ss_precision_info = mydata[rid][m].SingleStream.weight_data_types;
+                    let extra_model_info = `Model precision: ${ss_precision_info}
 Input data types: ${ss_precision_info}`;
                     html += `
                         <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].SingleStream.Location}"> ${Math.round(mydata[rid][m].SingleStream.Performance_Result * 10) / 10} </a> </td>
@@ -1437,8 +1435,8 @@ Input data types: ${ss_precision_info}`;
                     let github_ms_url = `${location_pre}${mydata[rid][m].MultiStream.Location.replace("results", "measurements")}/`;
                     // A temporary key value from summary_results.json is taken as server_precision_info
                     // To be included in summary_results.json
-                    let ms_precision_info = mydata[rid][m].MultiStream.compliance;
-                    let extra_model_info = `Weight data types: ${ms_precision_info}
+                    let ms_precision_info = mydata[rid][m].MultiStream.weight_data_types;
+                    let extra_model_info = `Model precision: ${ms_precision_info}
 Input data types: ${ms_precision_info}`;
                     html += `
                         <td class="col-result"><a target="_blank" title="${result_link_text}${extra_model_info}" href="${location_pre}${mydata[rid][m].MultiStream.Location}"> ${Math.round(mydata[rid][m].MultiStream.Performance_Result * 10) / 10} </a> </td>
@@ -1447,20 +1445,20 @@ Input data types: ${ms_precision_info}`;
             }else {
                 html += `<td></td>`;
                 if (with_power) {
-                html += `<td></td>`;
-                html += `<td></td>`;
+                    html += `<td></td>`;
+                    html += `<td></td>`;
                 }
                 if (!m.includes("3d-unet") || category == "edge") 
                 {
                     html += `<td></td>`;
-                html += `<td></td>`;
-                html += `<td></td>`;
+                    html += `<td></td>`;
+                    html += `<td></td>`;
                 }
                 if ((m.includes("retinanet") || m.includes("resnet")) && (category == "edge")) 
                 {
                     html += `<td></td>`;
-                html += `<td></td>`;
-                html += `<td></td>`;
+                    html += `<td></td>`;
+                    html += `<td></td>`;
                 }
             }
         });
@@ -1537,7 +1535,7 @@ Input data types: ${ms_precision_info}`;
 
 function processData(data, category, division, availability) {
     const myData = {};
-    const neededKeysModel = ["has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location"];
+    const neededKeysModel = ["has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location", "weight_data_types"];
     const neededKeysSystem = ["System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details", "Platform"];
 
     data.forEach(item => {
@@ -1596,7 +1594,7 @@ function filterData(category, division, with_power, availability, data) {
         const availabilityMatch = item.Availability == availability.toLowerCase();
         // Determine if the item should be included based on with_power
         let powerMatch;
-        if (with_power === "true") {
+        if (with_power) {
             powerMatch = item.hasOwnProperty('Power_Result'); // Check for the key
         } else {
             powerMatch = !item.hasOwnProperty('Power_Result'); // Check for absence of the key
@@ -1611,18 +1609,34 @@ function filterData(category, division, with_power, availability, data) {
     return result;
 }
 
+const dbName = "mlperf_inference";
+const dbVersion = 3;
+const objStore = "inference_results";
+
 function fetchSummaryData() {
     // Open (or create) the database
-    var request = indexedDB.open("MyDatabase", 1);
+    var request = indexedDB.open(dbName, dbVersion);
 
     request.onupgradeneeded = function(event) {
         var db = event.target.result;
 
-        // Create an object store named "myStore" with "Location" as the keyPath
-        if (!db.objectStoreNames.contains("myStore")) {
-            var objectStore = db.createObjectStore("myStore", { autoIncrement: true });
+        switch (event.oldVersion) {
+
+            case 1:
+                if (db.objectStoreNames.contains(objStore)) {
+                    db.deleteObjectStore(objStore);
+                    console.log("Old object store removed");
+                }
+             default:
+
+        // Create an object store with "Location" as the keyPath
+        if (!db.objectStoreNames.contains(objStore)) {
+            var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
         }
         fetchAndStoreData(db);
+        
+        }
+
     };
 
     request.onsuccess = function(event) {
@@ -1640,8 +1654,8 @@ function fetchSummaryData() {
 function fetchAndStoreData(db) {
     $.getJSON("https://raw.githubusercontent.com/GATEOverflow/inference_results_v4.0/main/summary_results.json", function(data) {
         // Begin a transaction to save data in IndexedDB
-        var transaction = db.transaction(["myStore"], "readwrite");
-        var objectStore = transaction.objectStore("myStore");
+        var transaction = db.transaction([objStore], "readwrite");
+        var objectStore = transaction.objectStore(objStore);
 
         var count = 0;
         for(i = 0; i < data.length; i++) {
@@ -1663,7 +1677,7 @@ function fetchAndStoreData(db) {
         };
 
         transaction.onerror = function(event) {
-            // console.error("Transaction error: " + event.target.errorCode);
+            console.error("Transaction error: " + event.target.errorCode);
         };
     }).fail(function(jqxhr, textStatus, error) {
         console.error("Request Failed: " + textStatus + ", " + error);
@@ -1674,12 +1688,12 @@ function fetchAndStoreData(db) {
 function readAllData() {
     return new Promise((resolve, reject) => {
         // Open the database
-        var request = indexedDB.open("MyDatabase", 1);
+        var request = indexedDB.open(dbName, dbVersion);
 
         request.onsuccess = function(event) {
             var db = event.target.result;
-            var transaction = db.transaction(["myStore"], "readonly");
-            var objectStore = transaction.objectStore("myStore");
+            var transaction = db.transaction([objStore], "readonly");
+            var objectStore = transaction.objectStore(objStore);
 
             // Open a cursor to iterate through all records
             var data = [];

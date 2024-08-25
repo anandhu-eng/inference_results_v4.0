@@ -124,7 +124,7 @@ def getsummarydata(data, category, division):
 def processdata(data, category, division, availability):
 
     mydata = {}
-    needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location" ]
+    needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location", "weight_data_types" ]
 
     needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details", "Platform" ]
     for item in data:
@@ -156,6 +156,7 @@ def processdata(data, category, division, availability):
 
 models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
 
+'''
 def get_precision_info(measurements_url, platform):
     return {'weight_data_types': '', 'input_data_types': ''}
     github_url  = measurements_url
@@ -166,6 +167,7 @@ def get_precision_info(measurements_url, platform):
     with urllib.request.urlopen(measurements_json_raw) as url:
         data = json.load(url)
     return data
+'''
 
 def construct_table(category, division, availability):
     # Initialize the HTML table with the header
@@ -269,20 +271,25 @@ Notes: {mydata[rid]['Notes']}
             if mydata[rid].get(m):
                 if mydata[rid][m].get('Server'):
                     github_server_url  = f"""{location_pre}{mydata[rid][m]['Server']['Location'].replace("results", "measurements")}/"""
-                    server_precision_info = get_precision_info( github_server_url, mydata[rid]['Platform'])
+                    '''server_precision_info = get_precision_info( github_server_url, mydata[rid]['Platform'])
                     extra_model_info = f"""Weight data types: {server_precision_info['weight_data_types']}
 Input data types: {server_precision_info['input_data_types']}
                     """
+                    '''
+                    extra_model_info = f"""Model precision: {mydata[rid][m]['Server']['weight_data_types']}"""
                     #print(server_precision_info)
                     
                     html += f"""
                         <td class="col-result"><a target="_blank" title="{result_link_text}{extra_model_info}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
                     """
                 github_offline_url  = f"""{location_pre}{mydata[rid][m]['Offline']['Location'].replace("results", "measurements")}/"""
+                extra_model_info = f"""Model precision: {mydata[rid][m]['Offline']['weight_data_types']}"""
+                '''
                 offline_precision_info = get_precision_info( github_offline_url, mydata[rid]['Platform'])
                 extra_model_info = f"""Weight data types: {offline_precision_info['weight_data_types']}
 Input data types: {offline_precision_info['input_data_types']}
                     """
+                '''
                 html += f"""
                 <td class="col-result"><a target="_blank" title="{result_link_text}{extra_model_info}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
                 """
