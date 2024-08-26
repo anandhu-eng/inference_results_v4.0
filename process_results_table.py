@@ -375,6 +375,37 @@ def construct_summary_table(category, division):
     html += "</table></div>"
     return html
 
+def construct_chart_from_summary(category, division):
+    summary_data, count_data = getsummarydata(data, category, division)
+
+    html = ""
+    html += """
+        <div id="submittervssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
+        <div id="modelvssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
+    """
+    submitter_vs_submissions_cnt = {}
+    models_vs_submissions_cnt = {}
+
+    # loop for getting submitters vs number of submissions count
+    for submitter, item in count_data.items():
+        cnt = 0
+        for m in models:
+            if item.get(m, '') != '':
+                cnt += item[m]
+                if models_vs_submissions_cnt.get(m, '') == '':
+                    models_vs_submissions_cnt[m] = item[m]
+                else:
+                    models_vs_submissions_cnt[m] += item[m]
+        submitter_vs_submissions_cnt[submitter] = cnt
+
+    submitter_vs_submissions_cnt = [{"label": key, "y": value} for key, value in submitter_vs_submissions_cnt.items()]
+    
+    models_vs_submissions_cnt = [{"label": key, "y": value} for key, value in models_vs_submissions_cnt.items()]
+    
+    return html,submitter_vs_submissions_cnt, models_vs_submissions_cnt
+            
+
+
 categories = { "datacenter" : "Datacenter",
               "edge": "Edge"
               }
@@ -465,17 +496,26 @@ html += f"""
 <hr>
 """
 
-html += generate_html_form(categories, divisions)
 
 
-extra_scripts = """
+html_chart,submitter_vs_submissions_cnt, models_vs_submissions_cnt = construct_chart_from_summary(category, division)
+html += html_chart
+print(submitter_vs_submissions_cnt)
+
+extra_scripts = f"""
 <script type="text/javascript">
 var sortcolumnindex = 4, perfsortorder = 1;
+var submitterVsSubmissionsCnt = {submitter_vs_submissions_cnt}
+var modelsVsSubmissionsCnt = {models_vs_submissions_cnt}
 </script>
 
 <script type="text/javascript" src="javascripts/results_tablesorter.js"></script>
 
+
+
 """
+
+html += generate_html_form(categories, divisions)
 
 out_html = f"""---
 hide:
