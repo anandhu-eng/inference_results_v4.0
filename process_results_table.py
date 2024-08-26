@@ -466,8 +466,8 @@ html += f"""
 """
 
 html += """
-    <div id="submittervssubmissionchartContainer" class="chart1";"></div>
-    <div id="modelvssubmissionchartContainer" class="chart1"></div>
+    <div id="submittervssubmissionchartContainer" class="bgtext" style="height:370px; width:80%; margin:auto;"></div>
+    <div id="modelvssubmissionchartContainer" class="bgtext" style="height:370px; width:80%; margin:auto;"></div>
     """
 
 html += generate_html_form(categories, divisions)

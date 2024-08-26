@@ -106,7 +106,6 @@ function drawChartResults(){
         },
         axisY: {
             title: "Number of Submissions",
-            interval: 10
         },
         axisX: {
             title: "Submitters"
@@ -125,7 +124,6 @@ function drawChartResults(){
         },
         axisY: {
             title: "Number of Submissions",
-            interval: 50
         },
         axisX: {
             title: "Models"
