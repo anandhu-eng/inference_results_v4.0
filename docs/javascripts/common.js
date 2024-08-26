@@ -221,11 +221,28 @@ $.each(array, function(index, value) {
         sel_text = ""
     }
     let $option = $('<option '+sel_text+'></option>') // Create a new option element
-        .val(value.toLowerCase().replace(/ /g, '_')) // Optionally set a value attribute
+        .val(value.replace(/ /g, '_')) // Optionally set a value attribute
         .text(value); // Set the display text
 
     $select.append($option); // Append the option to the select element
 });
 }
 
+let tableposhtml = `
+            <!-- pager -->
+            <div class="pager">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+        `;
 

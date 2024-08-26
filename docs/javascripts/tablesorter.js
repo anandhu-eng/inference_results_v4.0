@@ -1,3 +1,5 @@
+
+function tableSorterInit () {
 $(".tablesorter").each(function() {
     var $table = $(this);
     var containerId = $table.closest('div').attr('id');
@@ -274,6 +276,7 @@ $(".tablesorter").each(function() {
 
         // target the pager markup - see the HTML block below
         container: $("#" + containerId + " .pager"),
+        //container: $(".pager"),
 
         // use this url format "http:/mydatabase.com?page={page}&size={size}"
         ajaxUrl: null,
@@ -369,3 +372,4 @@ $.extend($.tablesorter.themes.jui, {
     even: 'ui-widget-content', // even row zebra striping
     odd: 'ui-state-default' // odd row zebra striping
 });
+}

@@ -92,6 +92,7 @@ $(document).ready(function() {
     {
         $('.power-content').hide();
     }
+    tableSorterInit();
     $('#compareform').submit(function(event) {
         event.preventDefault(); // This will cancel the form submission
 

@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    //tableSorterInit();
     //console.log('Document is ready');
     // if(!is_power) {
     //     $('.power-content').hide();
@@ -61,7 +62,7 @@ function constructChartFromSummary(data, category, division, with_power) {
 
     if ( category==="edge" ) {
         models = models_edge;
-        console.log("edgecategory");
+        //console.log("edgecategory");
     }
     else {
         models = models_datacenter;

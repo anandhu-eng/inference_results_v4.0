@@ -10,7 +10,23 @@ hide:
 
         
 <div id="topresults_table_wrapper" class="resultstable_wrapper"> 
-
+<!-- pager -->
+<div class="pager">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+</div>
+<table class="tablesorter">
+</table>
 </div>
 
 <hr>
@@ -54,10 +70,10 @@ hide:
         <div class="form-field">
             <label for="scenario">Scenario</label>
             <select id="scenario" name="scenario" class="col">
-                <option value='offline' selected>Offline</option>
-                <option value='server'>Server</option>
-                <option value='singlestream'>SingleStream</option>
-                <option value='multistream'>MultiStream</option>
+                <option value='Offline' selected>Offline</option>
+                <option value='Server'>Server</option>
+                <option value='SingleStream'>SingleStream</option>
+                <option value='MultiStream'>MultiStream</option>
             </select>
         </div>
 
@@ -66,8 +82,8 @@ hide:
             <select id="metric" name="metric" class="col">
                 <option value="peak_performance" selected >Peak performance</option>
                 <option value="power_efficiency" >Power efficiency</option>
-                <option value="performance_per_accelerator" >Performance per accelerator</option>
-                <option value="performance_per_core" selected>Performance per core</option>
+                <option value="performance_per_accelerator" selected>Performance per accelerator</option>
+                <option value="performance_per_core">Performance per core</option>
             </select>
         </div>
 
@@ -92,10 +108,12 @@ hide:
 
 
 <script type="text/javascript">
-var sortcolumnindex = 4, perfsortorder = 1;
+var sortcolumnindex = 5, perfsortorder = 1;
 </script>
 
 <script type="text/javascript" src="javascripts/topresults.js"></script>
+<script type="text/javascript" src="javascripts/topresults_charts.js"></script>
+<script type="text/javascript" src="javascripts/tablesorter.js"></script>
 
 
 </html>

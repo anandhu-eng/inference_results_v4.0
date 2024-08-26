@@ -4,6 +4,7 @@ var scenarios = [ "Offline", "Server", "SingleStream", "MultiStream" ];
 var charts1 = {};
 var charts2 = {};
 var charts3 = {};
+
 function drawCompareCharts() {
     drawCompareCharts_("Offline");
     drawCompareCharts_("Server");

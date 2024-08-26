@@ -445,16 +445,14 @@ category="datacenter"
 html = ""
 for availability in availabilities:
     val = availability.lower()
-    pager_class= f"pager_{val}"
-    tableposhtmlval = tableposhtml.replace("PAGER_CLASS", pager_class)
     html_table = construct_table(category, division, val)
 
     if html_table:
         html += f"""
         <h2 id="results_heading_{availability.lower()}" class="results_table_heading">{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
-{tableposhtmlval}
+{tableposhtml}
 {html_table}
-{tableposhtmlval}
+{tableposhtml}
 <hr>
 """
 summary = construct_summary_table(category, division)
@@ -478,6 +476,7 @@ extra_scripts = """
 var sortcolumnindex = 4, perfsortorder = 1;
 </script>
 
+<!--<script type="text/javascript" src="javascripts/tablesorter.js"></script>-->
 <script type="text/javascript" src="javascripts/results_tablesorter.js"></script>
 """
 

@@ -1,72 +1,80 @@
-
+var allData = [];
 
 $( document ).on( "click", "athead th", function() {
     drawPerfCharts();
 });
 
-var device_column_name = "Processor";
-var device_count_column_name = "Total Physical Cores";
+var device_column_name = "Accelerator";
+var device_count_column_name = "#a";
 var additional_metric_column_name = "Performance per accelerator";
 var version = "v4.0";
 
 function updateContent(myData) {
-    var models = getUniqueValues(myData, "Model");
+    model = $("#model").val();
+    scenario = $("#scenario").val();
+    division = $("#division").val(); 
+    metric = $("#metric").val(); 
+    //updateScenarioUnits(myData);
+    tablehtml = constructTable(division, scenario, model, metric, myData);
+    //console.log(division+scenario);
+    //console.log(tablehtml);
+    document.getElementById("topresults_table_wrapper").innerHTML = tablehtml;
+    tableSorterInit();
+    /*
+    //$('table').tablesorter();
+    $("table").trigger("updateAll");
+    $('table')
+    .tablesorter()
+// bind to sort events
+    .bind('tablesorter-ready', function(e, table) {
+        // do something after the 'refreshWidgets' has refreshed
+        //drawPowerChart();
+        if (typeof drawCharts === 'function') {
+            drawCharts();
+        }
+        //drawCompareCharts();
+    });
+    */
+
+}
+
+$(document).ready(function() {
+    readAllData().then(function(global_data) {
+        //console.log(allData);
+        allData = global_data;
+        keys = [ "Suite", "Category", "Availability" ];
+        values = [ "datacenter", "closed", "available" ];
+        myData = filterData(allData, keys, values);
+        var models = getUniqueValues(myData, "Model");
+        scenario = "Offline";
+        division = "closed"; 
+        keys = ["Model", "Scenario"];
+        values = ["llama2-70b-99.9", scenario];
+        myData = filterData(myData, keys, values);
+        //console.log(myData);
+        $("#model").append('<option value="llama2-70b-99.9">Llama 2</option>');
     var platforms = getUniqueValues(myData, "Platform");
     var accelerators = getUniqueValues(myData, "Accelerator");
     var devices = getUniqueValuesCombined(myData, " x ", [ "Accelerator", "a#" ]);
     var platforms = getUniqueValuesCombined(myData, " : ", [ "version", "Platform" ]);
     var scenarios = validScenarios["datacenter"];// getUniqueValues(myData, "Scenario");
-    model = $("#model").val(); 
+    model = $("#model").val();
     updateScenarioUnits(myData);
     buildSelectOption(models, "model", model);
-    buildSelectOption(scenarios, "scenario");
+    buildSelectOption(scenarios, "scenario", scenario);
     buildSelectOption(platforms, "filter_systems");
-    buildSelectOption(devices, "filter_devices");
-    //console.log(models);
-    //console.log(platforms);
-    //console.log(accelerators);
-    division = $("#division").val(); 
-    scenario = $("#scenario").val(); 
-    tablehtml = constructTable(division, scenario, model, myData);
-    //console.log(division+scenario);
-    //console.log(tablehtml);
-    document.getElementById("topresults_table_wrapper").innerHTML = tablehtml;
-
-}
-$(document).ready(function() {
-    readAllData().then(function(allData) {
-        //console.log(allData);
-        keys = [ "Suite", "Category", "Availability" ];
-        values = [ "datacenter", "closed", "available" ];
-
-        myData = filterData(allData, keys, values);
         updateContent(myData);
     }).catch(function(error) {
         console.error(error);
     });
 
-    console.log("The page is fully loaded.");
+    //console.log("The page is fully loaded.");
 });
 
 
-function constructTable(division, scenario, model, result) {
-    let html = `
-        <div class="pager">
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/> 
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/> 
-            <span class="pagedisplay"></span> <!-- this can be any element, including an input --> 
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/> 
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/> 
-            <select class="pagesize" title="Select page size"> 
-                <option selected="selected" value="10">10</option> 
-                <option value="20">20</option> 
-                <option value="30">30</option> 
-                <option value="all">All</option> 
-            </select>
-            <select class="gotoPage" title="Select page number"></select>
-        </div>
-    `;
-
+function constructTable(division, scenario, model, metric, result) {
+    //console.log(metric);
+    let html = tableposhtml;
     let theader = `
         <th>System</th>
         <th>Submitter</th>
@@ -81,6 +89,7 @@ function constructTable(division, scenario, model, result) {
             <th>Accuracy</th>
         `;
     }
+    theader += `<th>Performance</th>`;
 
     if (additional_metric_column_name) {
         theader += `<th>${additional_metric_column_name}</th>`;
@@ -126,11 +135,11 @@ function constructTable(division, scenario, model, result) {
             html += `<td>${row.Accuracy}</td>`;
         }
 
-        html += `<td class='performance' title='${performance_title}'>${row.Performance_Result}</td>`;
+        html += `<td class='performance' title='${performance_title}'>${row.Performance_Result.toFixed(2)}</td>`;
 
         if (additional_metric_column_name) {
             let value;
-            if (metric === "Power efficiency") {
+            if (metric === "power_efficiency") {
                 let power_efficiency;
                 if (scenario === "Offline" || scenario === "Server") {
                     power_efficiency = (row.Performance_Result / row.Power_Result).toFixed(2);
@@ -139,11 +148,12 @@ function constructTable(division, scenario, model, result) {
                 } else if (scenario === "MultiStream") {
                     power_efficiency = (8000 / row.Power_Result).toFixed(2);
                 }
-                html += `<td class='power' title='Total Watts: ${row.Power_result}'>${power_efficiency}</td>`;
-            } else if (metric === "Performance per accelerator") {
+                html += `<td class='power' title='Total Watts: ${row.Power_result.toFixed(0)}'>${power_efficiency}</td>`;
+            } else if (metric === "performance_per_accelerator") {
+                //console.log(row.Performance_Result);
                 value = row["a#"] > 0 ? (row.Performance_Result / row["a#"]).toFixed(2) : "0";
                 html += `<td class='power'>${value}</td>`;
-            } else if (metric === "Performance per core") {
+            } else if (metric === "performance_per_core") {
                 value = (row.Performance_Result / cores).toFixed(2);
                 html += `<td class='power'>${value}</td>`;
             }
@@ -157,22 +167,7 @@ function constructTable(division, scenario, model, result) {
         </table>
     `;
 
-    html += `
-        <div class="pager">
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/> 
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/> 
-            <span class="pagedisplay"></span> <!-- this can be any element, including an input --> 
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/> 
-            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/> 
-            <select class="pagesize" title="Select page size"> 
-                <option selected="selected" value="10">10</option> 
-                <option value="20">20</option> 
-                <option value="30">30</option> 
-                <option value="all">All</option> 
-            </select>
-            <select class="gotoPage" title="Select page number"></select>
-        </div>
-    `;
+    html += tableposhtml;
 
     return html;
 
@@ -196,42 +191,80 @@ $( document ).on( "click", "#results_MultiStream thead th", function() {
 
 
 $(document).ready(function() {
-    //if(!is_power)
-    {
-        $('.power-content').hide();
-    }
     $('#resultSelectionForm').submit(function(event) {
         event.preventDefault(); // This will cancel the form submission
 
         // Your custom logic here
         //console.log('Form submission canceled.');
-        var system1 = $('#system1 option:selected').text();
+        var category = $('#category').val();
+        var division = $('#division').val();
+        var availability = $('#availability').val();
+        var scenario = $('#scenario').val();
+        var metric = $('#metric').val();
+        var model = $('#model').val();
         var system2 = $('#system2 option:selected').text();
-        var selected_models = $('#models option:selected').map(function() {
+        var filter_systems = $('#filter_systems option:selected').map(function() {
+            return $(this).text();
+        }).get();
+        var filter_devices = $('#filter_devices option:selected').map(function() {
             return $(this).text();
         }).get();
 
-        //console.log(system1);
-        //console.log(system2);
-        //console.log(selected_models);
-        //scenario = "Offline";
-        //getSummaryData();
-        /*   constructTable(scenario, models, system1, system2, False, results1, results2) {
+        //console.log(category+division+availability+scenario+metric+model);
+        keys = [ "Suite", "Category", "Availability" ];
+        values = [ category, division, availability ];
+        //console.log(allData);
+        myData = filterData(allData, keys, values);
+        //console.log(scenario);
+        var models = getUniqueValues(myData, "Model");
+        keys = ["Model", "Scenario"];
+        values = [model, scenario];
+        myData = filterData(myData, keys, values);
 
-        // Optionally, you can handle the form data yourself
-        */
-        var data;
-        readAllData().then(function(allData) {
-            //console.log(allData);
-            sysversion1 = "v4.0";
-            sysversion2 = "v4.0";
-            reConstructTables(system1, sysversion1, system2, sysversion2, selected_models, allData);
-        }).catch(function(error) {
-            console.error(error);
-        });
-    }
-    );
+
+        sortcolumnindex = 6;
+        perfcolumnindex = 7; // starting from 1
+        additional_metric_column_name = "";
+        chart2title = "";
+        chart2ytitle = "";
+        perfsortorder = 0;
+
+        if (metric === 'performance') {
+            device_column_name = "Device";
+            device_count_column_name = "#devices";
+            additional_metric_column_name = "";
+        } else if (metric === 'power_efficiency') {
+            device_column_name = "Processor";
+            device_count_column_name = "Total Physical Cores";
+            additional_metric_column_name = "Samples per Joule";
+            chart2title = "Power efficiency " + charttitlesuffix;
+            chart2ytitle = "Samples per Joule";
+            sortcolumnindex = 7;
+            perfsortorder = 1;
+        } else if (metric === 'performance_per_accelerator') {
+            device_column_name = "Accelerator";
+            device_count_column_name = "#a";
+            //filter = " and accelerators_per_node > 0";
+            if (scenario === "Offline") {
+                additional_metric_column_name = "Performance per accelerator";
+                //chart2title = "Performance per accelerator " + charttitlesuffix;
+                chart2ytitle = "Samples per second per accelerator";
+                sortcolumnindex = 7;
+            }
+       } else if (metric === 'performance_per_core') {
+            //filter = " and accelerators_per_node = 0";
+            device_column_name = "Processor";
+            device_count_column_name = "Total Physical Cores";
+            if (scenario === "Offline") {
+                additional_metric_column_name = "Performance per core";
+                chart2title = "Performance per core " + charttitlesuffix;
+                chart2ytitle = "Samples per second per core";
+                sortcolumnindex = 7;
+        }
+    }   
+
+        updateContent(myData);
+        //console.log(myData);
+    });
 
 });
-
-
