@@ -6,10 +6,10 @@ hide:
 
 <html>
 
-        <h2 id="results_heading_available" class="results_table_heading"></h2>
+<h2 id="topresults_heading" class="results_table_heading"></h2>
 
         
-<div id="results_table_available" class="resultstable_wrapper"> 
+<div id="topresults_table_wrapper" class="resultstable_wrapper"> 
 
 </div>
 
@@ -73,7 +73,7 @@ hide:
 
         <div class="form-field">
             <label for="filter_systems">Filter Systems</label>
-            <select id="filter_systems" name="filter_systems" class="col">
+             <select id="filter_systems" name="filter_systems[]" class="col" multiple size="30">
             </select>
         </div>
 

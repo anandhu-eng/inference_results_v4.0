@@ -149,6 +149,21 @@ function getUniqueValues(data, key) {
     return uniqueValues;
 }
 
+function updateScenarioUnits(data) {
+    $.each(data, function(index, item) {
+if (!scenarioUnits.hasOwnProperty(item['Scenario'])) {
+            scenarioUnits[item['Scenario']] = {}
+            scenarioUnits[item['Scenario']]['Performance_Units'] = item['Performance_Units'];
+        }
+        if (item.hasOwnProperty('Power_Units')) {
+            if(!scenarioUnits[item['Scenario']].hasOwnProperty('Power_Units')) {
+                scenarioUnits[item['Scenario']]['Power_Units'] = item['Power_Units'];
+            }
+        }
+    });
+}
+
+
 function getUniqueValuesCombined(data, sep, keys) {
     let uniqueValues = [];
     $.each(data, function(index, item) {
@@ -194,12 +209,18 @@ function filterData(data, keys, values) {
     return filtered_data;
 }
 
-function buildSelectOption(array, selectId) {
+function buildSelectOption(array, selectId, selected=null) {
 
     $select = $('#'+selectId);
     $select.empty();
 $.each(array, function(index, value) {
-    let $option = $('<option></option>') // Create a new option element
+    if(selected && value == selected) {
+        sel_text = " selected ";
+    }
+    else {
+        sel_text = ""
+    }
+    let $option = $('<option '+sel_text+'></option>') // Create a new option element
         .val(value.toLowerCase().replace(/ /g, '_')) // Optionally set a value attribute
         .text(value); // Set the display text
 
@@ -207,5 +228,4 @@ $.each(array, function(index, value) {
 });
 }
 
-//$('body').append($select); // Append the select element to the body or any other container
 
