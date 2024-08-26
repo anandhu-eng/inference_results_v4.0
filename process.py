@@ -201,7 +201,8 @@ def process_scenarios(system1, system2, sysversion1, sysversion2, modelfilterstr
         resultjson = json.dumps(result1)  # or any appropriate variable
         
         content[f'custom_{customid}'] += f"""
-            <div id="chartContainer{scenario}1" class="bgtext" style="height: 370px; width: 100%;"></div>
+            <button class="collapsible">Please click here to see Bar chart representation of the above data</button>
+            <div id="chartContainer{scenario}1" class="chart" style="height: 370px; width: 100%;"></div>
             <button class="btn btn-primary"  id="printChart{scenario}1">Download</button>
         """
         content[f'custom_{customid}'] += f"""

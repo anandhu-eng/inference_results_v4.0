@@ -3,14 +3,28 @@ $(document).ready(function() {
     // if(!is_power) {
     //     $('.power-content').hide();
     // }
+    // draw initial charts
+    var category = $('#category option:selected').val();
+    var division = $('#division option:selected').val();
+    var with_power = $('#with_power option:selected').map(function() {
+        return $(this).val() == "true";
+    }).get();
+    readAllData().then(function(allData) {
+        //  console.log(allData);
+        constructChartFromSummary(allData, category, division, with_power[0]);
+    }).catch(function(error) {
+        console.error(error);
+    });
+
+
     $('#resultSelectionForm').submit(function(event) {
         event.preventDefault(); // This will cancel the form submission
 
         // Your custom logic here
         //console.log('Form submission canceled.');
-        var category = $('#category option:selected').val();
-        var division = $('#division option:selected').val();
-        var with_power = $('#with_power option:selected').map(function() {
+        category = $('#category option:selected').val();
+        division = $('#division option:selected').val();
+        with_power = $('#with_power option:selected').map(function() {
             return $(this).val() == "true";
         }).get();
         //console.log(category);
@@ -23,6 +37,7 @@ $(document).ready(function() {
         readAllData().then(function(allData) {
             //  console.log(allData);
             reConstructTables(category, division, with_power[0], allData);
+            constructChartFromSummary(allData, category, division, with_power[0]);
         }).catch(function(error) {
             console.error(error);
         });
@@ -31,6 +46,99 @@ $(document).ready(function() {
 
     fetchSummaryData();
 });
+
+function constructChartFromSummary(data, category, division, with_power) {
+    const [summaryData, countData] = getSummaryData(data, category, division, with_power);
+
+    let html = "";
+    html += `
+        <div id="submittervssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
+        <div id="modelvssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
+    `;
+
+    let submitterVsSubmissionsCntTmp = {};
+    let modelsVsSubmissionsCntTmp = {};
+
+    if ( category==="edge" ) {
+        models = models_edge;
+        console.log("edgecategory");
+    }
+    else {
+        models = models_datacenter;
+        console.log("datacenter");
+    }
+
+    // Loop for getting submitters vs number of submissions count
+    for (const [submitter, item] of Object.entries(countData)) {
+        let cnt = 0;
+        for (const m of models) {
+            if (item[m] !== undefined && item[m] !== '') {
+                cnt += item[m];
+                if (modelsVsSubmissionsCntTmp[m] === undefined) {
+                    modelsVsSubmissionsCntTmp[m] = item[m];
+                } else {
+                    modelsVsSubmissionsCntTmp[m] += item[m];
+                }
+            }
+        }
+        submitterVsSubmissionsCntTmp[submitter] = cnt;
+    }
+
+    submitterVsSubmissionsCnt = Object.entries(submitterVsSubmissionsCntTmp).map(([key, value]) => ({
+        label: key,
+        y: value
+    }));
+
+    modelsVsSubmissionsCnt = Object.entries(modelsVsSubmissionsCntTmp).map(([key, value]) => ({
+        label: key,
+        y: value
+    }));
+
+    drawChartResults();
+}
+
+function drawChartResults(){
+    var submittervssubmissionchart = new CanvasJS.Chart("submittervssubmissionchartContainer", {
+        animationEnabled: true,
+        theme: "light2",
+        title: {
+            text: "Submissions per Submitter"
+        },
+        axisY: {
+            title: "Number of Submissions",
+            interval: 10
+        },
+        axisX: {
+            title: "Submitters"
+        },
+        data: [{
+            type: "column",
+            dataPoints: submitterVsSubmissionsCnt
+        }]
+    });
+
+    var modelvssubmissionchart = new CanvasJS.Chart("modelvssubmissionchartContainer", {
+        animationEnabled: true,
+        theme: "light2",
+        title: {
+            text: "Submissions per Model"
+        },
+        axisY: {
+            title: "Number of Submissions",
+            interval: 50
+        },
+        axisX: {
+            title: "Models"
+        },
+        data: [{
+            type: "column",
+            dataPoints: modelsVsSubmissionsCnt
+        }]
+    });
+
+    submittervssubmissionchart.render();
+    modelvssubmissionchart.render();
+}
 
 function reConstructTables(category, division, with_power, data){
     availabilities = [ "Available", "Preview", "RDI" ]; 
