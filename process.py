@@ -293,6 +293,7 @@ out_html = ""
 for key,value in content.items():
     out_html += "\n" + value
 out_html += """
+<script type="text/javascript" src="javascripts/compare_results_charts.js">
 <script type="text/javascript" src="javascripts/compare_results.js">
 </script>
 """
