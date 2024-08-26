@@ -465,6 +465,13 @@ html += f"""
 <hr>
 """
 
+html += """
+    <button class="collapsible">Please click here to see Submitters V/S Number of Submissions chart</button>
+    <div id="submittervssubmissionchartContainer" class="chart";"></div>
+    <button class="collapsible">Please click here to see Models V/S Number of Submissions</button>
+    <div id="modelvssubmissionchartContainer" class="chart"></div>
+    """
+
 html += generate_html_form(categories, divisions)
 
 
@@ -474,7 +481,6 @@ var sortcolumnindex = 4, perfsortorder = 1;
 </script>
 
 <script type="text/javascript" src="javascripts/results_tablesorter.js"></script>
-
 """
 
 out_html = f"""---
