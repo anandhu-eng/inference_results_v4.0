@@ -466,10 +466,8 @@ html += f"""
 """
 
 html += """
-    <button class="collapsible">Please click here to see Submitters V/S Number of Submissions chart</button>
-    <div id="submittervssubmissionchartContainer" class="chart";"></div>
-    <button class="collapsible">Please click here to see Models V/S Number of Submissions</button>
-    <div id="modelvssubmissionchartContainer" class="chart"></div>
+    <div id="submittervssubmissionchartContainer" class="chart1";"></div>
+    <div id="modelvssubmissionchartContainer" class="chart1"></div>
     """
 
 html += generate_html_form(categories, divisions)
