@@ -135,7 +135,7 @@ scenarios.forEach(function(scenario) {
     let values = [scenario, system1, sysversion1];
     //console.log(scenario);    
 
-    let result1 = filterdata(data, keys, values);
+    let result1 = filterData(data, keys, values);
     if (result1.length === 0) {
         $("#"+scenario).hide();
         //console.log(scenario +" is getting hidden")
@@ -143,7 +143,7 @@ scenarios.forEach(function(scenario) {
     }
 
     values = [scenario, system2, sysversion2];
-    let result2 = filterdata(data, keys, values);
+    let result2 = filterData(data, keys, values);
     if (result2.length === 0) {
         $("#"+scenario).hide();
         //console.log(scenario +" is getting hidden")
@@ -218,30 +218,3 @@ scenarios.forEach(function(scenario) {
     drawCompareCharts();
 });
 }
-
-function filterdata(data, keys, values) {
-    let filtered_data = [];
-    if (!data) return filtered_data;
-
-    data.forEach(function(item) {
-        let mismatch = false;
-
-        for (let i = 0; i < keys.length; i++) {
-            let key = keys[i];
-            let value = values[i];
-
-            if (item[key] !== value) {
-                mismatch = true;
-                break;
-            }
-        }
-
-        if (!mismatch) {
-            filtered_data.push(item);
-        }
-    });
-
-    return filtered_data;
-}
-
-

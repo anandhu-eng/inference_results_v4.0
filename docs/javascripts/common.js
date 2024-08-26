@@ -121,3 +121,73 @@ function readAllData() {
     });
 }
 
+function getUniqueValues(data, key) {
+    let uniqueValues = [];
+    $.each(data, function(index, item) {
+        if (item[key] && uniqueValues.indexOf(item[key]) === -1) {
+            uniqueValues.push(item[key]);
+        }
+    });
+    return uniqueValues;
+}
+
+function getUniqueValuesCombined(data, sep, keys) {
+    let uniqueValues = [];
+    $.each(data, function(index, item) {
+        values = []
+        for(key in keys)
+            values.push(item[keys[key]]);
+        merged = values.join(sep);
+        if (uniqueValues.indexOf(merged) === -1) {
+            uniqueValues.push(merged);
+        }
+    });
+    return uniqueValues;
+}
+
+function filterData(data, keys, values) {
+    let filtered_data = [];
+    if (!data) return filtered_data;
+
+    data.forEach(function(item) {
+        let mismatch = false;
+
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
+            let value = values[i];
+
+            if (key == "Suite") {
+                if (!item[key].includes(value)) {
+                    mismatch = true;
+                    break;
+                }
+            }
+            else if (item[key] !== value) {
+                mismatch = true;
+                break;
+            }
+        }
+
+        if (!mismatch) {
+            filtered_data.push(item);
+        }
+    });
+
+    return filtered_data;
+}
+
+function buildSelectOption(array, selectId) {
+
+    $select = $('#'+selectId);
+    $select.empty();
+$.each(array, function(index, value) {
+    let $option = $('<option></option>') // Create a new option element
+        .val(value.toLowerCase().replace(/ /g, '_')) // Optionally set a value attribute
+        .text(value); // Set the display text
+
+    $select.append($option); // Append the option to the select element
+});
+}
+
+//$('body').append($select); // Append the select element to the body or any other container
+
