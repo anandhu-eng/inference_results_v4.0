@@ -113,9 +113,8 @@ $(document).ready(function() {
 
         // Optionally, you can handle the form data yourself
         */
-        var data;
         readAllData().then(function(allData) {
-            //console.log(allData);
+//            console.log(allData);
             sysversion1 = "v4.0";
             sysversion2 = "v4.0";
             reConstructTables(system1, sysversion1, system2, sysversion2, selected_models, allData);
@@ -125,13 +124,15 @@ $(document).ready(function() {
       }
     );
 
-        fetchSummaryData();
+        //fetchSummaryData();
 });
 
 // scenarios, system1, sysversion1, system2, sysversion2, data, ytitle_scenarios
 function reConstructTables(system1, sysversion1, system2, sysversion2, selected_models, data) {
-    scenarios = [ "Offline", "Server", "SingleStream", "MultiStream"];
-scenarios.forEach(function(scenario) {
+    myscenarios = [ "Offline", "Server", "SingleStream", "MultiStream"];
+
+    myscenarios.forEach(function(scenario) {
+
     let keys = ["Scenario", "Platform", "version"];
     let values = [scenario, system1, sysversion1];
     //console.log(scenario);    

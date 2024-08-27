@@ -10,14 +10,14 @@ models_datacenter = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9"
 models_edge = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
 
 const dbName = "mlperf_inference";
-const dbVersion = 3;
+const dbVersion = 4;
 const objStore = "inference_results";
 
-
+/*
 function fetchSummaryData() {
     // Open (or create) the database
     var request = indexedDB.open(dbName, dbVersion);
-    console.log(request)
+    //console.log(request)
 
     request.onsuccess = function(event) {
         console.log("Database opened successfully!");
@@ -27,6 +27,12 @@ function fetchSummaryData() {
         if (db.objectStoreNames.contains(objStore)) {
             console.log("Object store exists.");
         } else {
+            // Create an object store with "Location" as the keyPath
+            if (!db.objectStoreNames.contains(objStore)) {
+                var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
+                console.log("object store created")
+            }
+            fetchAndStoreData(db);
             console.log("Object store does not exist.");
         }
     };
@@ -56,17 +62,8 @@ function fetchSummaryData() {
 
     };
 
-    request.onsuccess = function(event) {
-        var db = event.target.result;
 
-        // Fetch the JSON data from the URL and store it in IndexedDB
-        //fetchAndStoreData(db);
-    };
-
-    request.onerror = function(event) {
-        console.error("Error opening IndexedDB: " + event.target.errorCode);
-    };
-}
+}*/
 
 function fetchAndStoreData(db) {
     $.getJSON("https://raw.githubusercontent.com/GATEOverflow/inference_results_v4.0/main/summary_results.json", function(data) {
@@ -109,6 +106,11 @@ function readAllData() {
 
         request.onsuccess = function(event) {
             var db = event.target.result;
+            if (!db.objectStoreNames.contains(objStore)) {
+                var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
+                console.log("object store created")
+                fetchAndStoreData(db);
+            }
             var transaction = db.transaction([objStore], "readonly");
             var objectStore = transaction.objectStore(objStore);
 
@@ -131,9 +133,31 @@ function readAllData() {
             };
         };
 
-        request.onerror = function(event) {
-            reject("Error opening IndexedDB: " + event.target.errorCode);
-        };
+         request.onerror = function(event) {
+        console.error("Error opening IndexedDB: " + event);
+    };
+
+
+      request.onupgradeneeded = function(event) {
+        var db = event.target.result;
+        console.log(event.oldVersion);
+        if((dbVersion - event.oldVersion) > 0) {
+            if (db.objectStoreNames.contains(objStore)) {
+                db.deleteObjectStore(objStore);
+                console.log("Old object store removed");
+            }
+        }
+
+        // Create an object store with "Location" as the keyPath
+        if (!db.objectStoreNames.contains(objStore)) {
+            var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
+            console.log("object store created")
+        }
+        fetchAndStoreData(db);
+
+
+    };
+
     });
 }
 

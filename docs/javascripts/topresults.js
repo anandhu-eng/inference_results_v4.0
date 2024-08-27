@@ -55,6 +55,7 @@ $('html, body').animate({
 }
 
 $(document).ready(function() {
+     allData = [];
     readAllData().then(function(global_data) {
         //console.log(allData);
         allData = global_data;

@@ -10,6 +10,7 @@ $(document).ready(function() {
     var with_power = $('#with_power option:selected').map(function() {
         return $(this).val() == "true";
     }).get();
+
     readAllData().then(function(allData) {
         //  console.log(allData);
         constructChartFromSummary(allData, category, division, with_power[0]);
@@ -45,7 +46,7 @@ $(document).ready(function() {
     }
     );
 
-    fetchSummaryData();
+    //fetchSummaryData();
 });
 
 function constructChartFromSummary(data, category, division, with_power) {
@@ -143,7 +144,7 @@ function reConstructTables(category, division, with_power, data){
     availabilities = [ "Available", "Preview", "RDI" ]; 
     availabilities.forEach(function(availability) {
         // filtered data as per the user choice
-        const filteredResults = filterData(category, division, with_power, availability, data);
+        const filteredResults = filterDataResultsTable(category, division, with_power, availability, data);
         //console.log(filteredResults.length);
         var html_table = constructTable(category, division, with_power, availability, filteredResults);
         var tableHeading = `${category} Category: ${availability} submissions in ${division} division`;
@@ -967,7 +968,7 @@ function processData(data, category, division, availability) {
 
 
 // function to filter data in according to the user selection
-function filterData(category, division, with_power, availability, data) {
+function filterDataResultsTable(category, division, with_power, availability, data) {
     const result = []; // Initialize an empty object to hold the filtered results
 
     data.forEach(item => {
