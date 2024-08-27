@@ -6,7 +6,7 @@ $( document ).on( "click", "#results thead th", function() {
 
 var device_column_name = "Accelerator";
 var device_count_column_name = "#a";
-var additional_metric_column_name = "Performance per accelerator";
+var additional_metric_column_name = "";
 var version = "v4.0";
 var openmodel=false;
 var sortcolumnindex = 6;
@@ -22,6 +22,8 @@ var perfsortorder = 1;
 var model='llama2-70b-99.9';
 $('#chartContainer3').hide();
 $('#printChart3').hide();
+$('#chartContainer2').hide();
+$('#printChart2').hide();
 
 function updateContent(myData) {
     //$("#topresults_table_wrapper").focus();
@@ -77,12 +79,12 @@ $(document).ready(function() {
         buildSelectOption(scenarios, "scenario", scenario);
         platforms.unshift("All systems");
         buildSelectOption(platforms, "filter_systems", "All systems");
-        devices.unshift("All accelerators");
-        buildSelectOption(devices, "filter_devices", "All accelerators");
+        devices.unshift("All devices");
+        buildSelectOption(devices, "filter_devices", "All devices");
         charttitlesuffix = ` for ${model} ${scenario} scenario in ${division} division ${category} category`;
         chart1title = "Performance " + charttitlesuffix;
-        chart2title = "Performance per accelerator " + charttitlesuffix;
-        chart2ytitle = "Samples per second per accelerator";
+       // chart2title = "Performance per accelerator " + charttitlesuffix;
+        //chart2ytitle = "Samples per second per accelerator";
         updateContent(myData);
     }).catch(function(error) {
         console.error(error);
@@ -104,7 +106,8 @@ function constructTable(division, scenario, model, metric, result) {
         <th>Framework</th>
     `;
 
-    if (division === "open") {
+    if (division == "open") {
+        openmodel = true;
         theader += `
             <th>Model</th>
             <th>Accuracy</th>
@@ -152,9 +155,13 @@ function constructTable(division, scenario, model, metric, result) {
 
         html += `<td>${row.Software}</td>`;
 
-        if (division === "open") {
-            html += `<td>${row.Model}</td>`;
-            html += `<td>${row.Accuracy}</td>`;
+        if (division == "open") {
+            html += `<td>${row.UsedModel}</td>`;
+            acc__ = row.Accuracy.split("  ")
+            acc_ = acc__[0].split(":")
+            acc = parseFloat(acc_[1])
+
+            html += `<td>${acc}</td>`;
         }
 
         html += `<td class='performance' title='${performance_title}'>${row.Performance_Result.toFixed(2)}</td>`;
@@ -217,11 +224,11 @@ $(document).ready(function() {
         var platforms = getUniqueValuesCombined(myData, " : ", [ "version", "Platform" ]);
         var scenarios = validScenarios["datacenter"];// getUniqueValues(myData, "Scenario");
         platforms.unshift("All systems");
-        devices.unshift("All accelerators");
+        devices.unshift("All devices");
         buildSelectOption(models, "model", model);
         buildSelectOption(scenarios, "scenario", scenario);
         buildSelectOption(platforms, "filter_systems", "All systems");
-        buildSelectOption(devices, "filter_devices", "All accelerators");
+        buildSelectOption(devices, "filter_devices", "All devices");
     });
 
     $('#model').on('change', function() {

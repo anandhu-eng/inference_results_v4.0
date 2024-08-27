@@ -30,6 +30,8 @@ function drawPerfCharts() {
 				accuracy.push( $(this).text() );       
 		});
 
+    //console.log(models);
+    //console.log(accuracy);
 	}
 	else {
 		models.push(model);

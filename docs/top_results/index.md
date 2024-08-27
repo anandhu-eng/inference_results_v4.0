@@ -76,7 +76,7 @@ hide:
             <select id="metric" name="metric" class="col">
                 <option value="peak_performance" selected >Peak performance</option>
                 <option value="power_efficiency" >Power efficiency</option>
-                <option value="performance_per_accelerator" selected>Performance per accelerator</option>
+                <option value="performance_per_accelerator">Performance per accelerator</option>
                 <option value="performance_per_core">Performance per core</option>
             </select>
         </div>
