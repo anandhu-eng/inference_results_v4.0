@@ -30,7 +30,7 @@ hide:
 
         <div class="form-field">
             <label for="category">Category</label>
-            <select id="category" name="category" class="col">
+            <select id="category" name="category" class="col myFilter">
                 <option value='datacenter' >Datacenter</option>
 <option value='edge' >Edge</option>
 
@@ -39,7 +39,7 @@ hide:
 
         <div class="form-field">
             <label for="division">Division</label>
-            <select id="division" name="division" class="col">
+            <select id="division" name="division" class="col myFilter">
                 <option value='closed' selected>Closed</option>
 <option value='open' >Open</option>
 
@@ -48,7 +48,7 @@ hide:
 
         <div class="form-field">
             <label for="availability">Availability</label>
-            <select id="availability" name="availability" class="col">
+            <select id="availability" name="availability" class="col myFilter">
                 <option value='available' selected >Available</option>
                 <option value='preview' >Preview</option>
                 <option value='rdi' >RDI</option>

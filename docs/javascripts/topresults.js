@@ -24,6 +24,7 @@ $('#chartContainer3').hide();
 $('#printChart3').hide();
 
 function updateContent(myData) {
+    //$("#topresults_table_wrapper").focus();
     model = $("#model").val();
     scenario = $("#scenario").val();
     division = $("#division").val(); 
@@ -45,7 +46,9 @@ function updateContent(myData) {
         //drawPowerChart();
         drawPerfCharts();
     });
-
+$('html, body').animate({
+            scrollTop: 0
+        }, 'slow');
 }
 
 $(document).ready(function() {
@@ -129,9 +132,9 @@ function constructTable(division, scenario, model, metric, result) {
         html += `<td title="${platform}">${row.System}</td>`;
         html += `<td>${row.Submitter}</td>`;
 
-        if (row["a#"] == 0) {
+        if (!(row["a#"] > 0)) {
             cores = row.Nodes * row.host_processors_per_node * row.host_processor_core_count;
-            html += `<td>${row.host_processor_model_name}</td>`;
+            html += `<td>${row.Processor}</td>`;
             html += `<td>${cores}</td>`;
         } else {
             html += `<td>${row.Accelerator}</td>`;
@@ -189,6 +192,34 @@ function constructTable(division, scenario, model, metric, result) {
 
 
 $(document).ready(function() {
+    $('.myFilter').on('change', function() {
+        var category = $('#category').val();
+        var division = $('#division').val();
+        var availability = $('#availability').val();
+        var model = $('#model').val();
+        keys = [ "Suite", "Category", "Availability" ];
+        values = [ category, division, availability ];
+        //console.log(allData);
+        myData = filterData(allData, keys, values);
+        //console.log(scenario);
+        var models = getUniqueValues(myData, "Model");
+        buildSelectOption(models, "model", model);
+    });
+
+    $('#model').on('change', function() {
+        var category = $('#category').val();
+        var division = $('#division').val();
+        var availability = $('#availability').val();
+        var model = $('#model').val();
+        keys = [ "Suite", "Category", "Availability", "Model" ];
+        values = [ category, division, availability, model ];
+        //console.log(allData);
+        myData = filterData(allData, keys, values);
+        //console.log(scenario);
+        var scenarios = getUniqueValues(myData, "Scenario");
+        buildSelectOption(scenarios, "scenario", scenario);
+    });
+
     $('#resultSelectionForm').submit(function(event) {
         event.preventDefault(); // This will cancel the form submission
 
@@ -200,7 +231,6 @@ $(document).ready(function() {
         var scenario = $('#scenario').val();
         var metric = $('#metric').val();
         var model = $('#model').val();
-        var system2 = $('#system2 option:selected').text();
         var filter_systems = $('#filter_systems option:selected').map(function() {
             return $(this).text();
         }).get();
@@ -229,16 +259,16 @@ $(document).ready(function() {
         myData = filterData(allData, keys, values);
         //console.log(scenario);
         var models = getUniqueValues(myData, "Model");
-        keys = ["Model", "Scenario"];
-        values = [model, scenario];
-        myData = filterData(myData, keys, values);
-
 
         additional_metric_column_name = "";
         chart2title = "";
         chart2ytitle = "";
         perfsortorder = 0;
         charttitlesuffix = ` for ${model} ${scenario} scenario in ${division} division ${category} category`;
+        keys = ["Model", "Scenario"];
+        values = [model, scenario];
+        extra_filter=null;
+
 
         if (metric === 'performance') {
             device_column_name = "Device";
@@ -247,6 +277,7 @@ $(document).ready(function() {
             $('#chartContainer2').hide();
             $('#printChart2').hide();
         } else if (metric === 'power_efficiency') {
+            extra_filter = "power";
             device_column_name = "Processor";
             device_count_column_name = "Total Physical Cores";
             additional_metric_column_name = "Samples per Joule";
@@ -256,6 +287,7 @@ $(document).ready(function() {
             perfsortorder = 1;
             $('#chartContainer2').show();
         } else if (metric === 'performance_per_accelerator') {
+            extra_filter = "accelerator_only";
             device_column_name = "Accelerator";
             device_count_column_name = "#a";
             //filter = " and accelerators_per_node > 0";
@@ -267,7 +299,7 @@ $(document).ready(function() {
             }
             $('#chartContainer2').show();
        } else if (metric === 'performance_per_core') {
-            //filter = " and accelerators_per_node = 0";
+            extra_filter = "cpu_only";
             device_column_name = "Processor";
             device_count_column_name = "Total Physical Cores";
             if (scenario === "Offline") {
@@ -278,6 +310,8 @@ $(document).ready(function() {
             }
             $('#chartContainer2').show();
         }   
+        myData = filterData(myData, keys, values, extra_filter);
+
 
         updateContent(myData);
         //console.log(myData);

@@ -178,7 +178,7 @@ function getUniqueValuesCombined(data, sep, keys) {
     return uniqueValues;
 }
 
-function filterData(data, keys, values) {
+function filterData(data, keys, values, extra_filter=null) {
     let filtered_data = [];
     if (!data) return filtered_data;
 
@@ -198,6 +198,26 @@ function filterData(data, keys, values) {
             else if (item[key] !== value) {
                 mismatch = true;
                 break;
+            }
+            if(extra_filter) {
+                if(extra_filter == "accelerator_only"){
+                    if (!(item['a#'] > 0)) {
+                        mismatch = true;
+                        break;
+                    }
+                }
+                else if(extra_filter == "cpu_only"){
+                    if (item['a#'] > 0) {
+                        mismatch = true;
+                        break;
+                    }
+                }
+                else if(extra_filter == "power"){
+                    if (!(item.hasOwnProperty('Power_Result'))) {
+                        mismatch = true;
+                        break;
+                    }
+                }
             }
         }
 
