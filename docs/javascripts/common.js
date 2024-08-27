@@ -176,7 +176,7 @@ function getUniqueValuesCombined(data, sep, keys) {
     return uniqueValues;
 }
 
-function filterData(data, keys, values, extra_filter=null) {
+function filterData(data, keys, values, extra_filter=null, models=[]) {
     let filtered_data = [];
     if (!data) return filtered_data;
 
@@ -212,6 +212,12 @@ function filterData(data, keys, values, extra_filter=null) {
                 }
                 else if(extra_filter == "power"){
                     if (!(item.hasOwnProperty('Power_Result'))) {
+                        mismatch = true;
+                        break;
+                    }
+                }
+                else if(extra_filter == "selected_models"){
+                    if (!models.includes(item['Model'] )) {
                         mismatch = true;
                         break;
                     }

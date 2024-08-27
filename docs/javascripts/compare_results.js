@@ -137,7 +137,7 @@ function reConstructTables(system1, sysversion1, system2, sysversion2, selected_
     let values = [scenario, system1, sysversion1];
     //console.log(scenario);    
 
-    let result1 = filterData(data, keys, values);
+    let result1 = filterData(data, keys, values, "selected_models", selected_models);
     if (result1.length === 0) {
         $("#"+scenario).hide();
         //console.log(scenario +" is getting hidden")
@@ -145,7 +145,7 @@ function reConstructTables(system1, sysversion1, system2, sysversion2, selected_
     }
 
     values = [scenario, system2, sysversion2];
-    let result2 = filterData(data, keys, values);
+    let result2 = filterData(data, keys, values, "selected_models", selected_models);
     //console.log(result1);
     //console.log(result2);
     if (result2.length === 0) {
