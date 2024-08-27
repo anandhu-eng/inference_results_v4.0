@@ -9,6 +9,8 @@ on:
   push:
     branches:
       - newbranch
+      - main
+      - docss
 
 jobs:
 
