@@ -17,12 +17,29 @@ const objStore = "inference_results";
 function fetchSummaryData() {
     // Open (or create) the database
     var request = indexedDB.open(dbName, dbVersion);
+    console.log(request)
+
+    request.onsuccess = function(event) {
+        console.log("Database opened successfully!");
+        var db = event.target.result; // Get the database instance
+    
+        // You can check if the object store exists here if needed
+        if (db.objectStoreNames.contains(objStore)) {
+            console.log("Object store exists.");
+        } else {
+            console.log("Object store does not exist.");
+        }
+    };
+
+    request.onerror = function(event) {
+        console.error("Error opening IndexedDB: " + event);
+    };
+    
 
     request.onupgradeneeded = function(event) {
         var db = event.target.result;
-
-        switch (event.oldVersion) {
-
+        console.log(event.oldVersion);
+        switch (dbVersion - event.oldVersion) {
             case 1:
                 if (db.objectStoreNames.contains(objStore)) {
                     db.deleteObjectStore(objStore);
@@ -33,6 +50,7 @@ function fetchSummaryData() {
                 // Create an object store with "Location" as the keyPath
                 if (!db.objectStoreNames.contains(objStore)) {
                     var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
+                    console.log("object store created")
                 }
                 fetchAndStoreData(db);
 
