@@ -1,7 +1,8 @@
 import json
 import os
+import time
 
-with open('summary.json') as f:
+with open('summary_results.json') as f:
     data = json.load(f)
 #print(models_all)
 #print(platforms)
@@ -23,6 +24,55 @@ tableposhtml = """
             <select class="gotoPage" title="Select page number"></select>
 </div>
         """
+
+def get_json_files(github_url):
+    import requests
+    from bs4 import BeautifulSoup
+
+    retries = 5
+    retry_delay = 2
+
+    for attempt in range(retries):
+        try:
+            # Get the content of the GitHub page
+            response = requests.get(github_url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find all JSON files
+            #print(soup)
+            # Find the <script> tag with the specific data-target attribute
+            script_tag = soup.find('script', {'data-target': 'react-app.embeddedData', 'type': 'application/json'})
+
+            if script_tag:
+                # Extract the JSON content from the script tag
+                json_data = script_tag.string
+
+                # Parse the JSON string into a Python dictionary
+                data = json.loads(json_data)
+
+                # Access the parts of the JSON you are interested in
+                tree_items = data.get('payload', {}).get('tree', {}).get('items', [])
+                
+                json_files = [a['name'] for a in tree_items if a['name'].endswith('.json')]
+
+                return json_files
+        except requests.exceptions.RequestException as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:  # Don't wait after the last attempt
+                time.sleep(retry_delay)
+            else:
+                print("Max retries reached. Exiting.")
+                return None
+
+def find_match(files, re_name):
+    import re 
+    for file in files:
+        if re.match(re_name, file):
+            return file
+    print(re_name)
+    print(files)
+    return None
+
 
 def getsummarydata(data, category, division):
     mydata = {}
@@ -74,9 +124,9 @@ def getsummarydata(data, category, division):
 def processdata(data, category, division, availability):
 
     mydata = {}
-    needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location" ]
+    needed_keys_model = [ "has_power", "Performance_Result", "Performance_Units", "Accuracy", "Location", "weight_data_types" ]
 
-    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details" ]
+    needed_keys_system = [ "System", "Submitter", "Availability", "Category", "Accelerator", "a#", "Nodes", "Processor", "host_processors_per_node", "host_processor_core_count", "Notes", "Software", "Details", "Platform" ]
     for item in data:
         if item['Suite'] != category:
             continue
@@ -106,9 +156,22 @@ def processdata(data, category, division, availability):
 
 models = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9", "bert-99", "bert-99.9", "stable-diffusion-xl",  "dlrm-v2-99", "dlrm-v2-99.9", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9"  ]
 
+'''
+def get_precision_info(measurements_url, platform):
+    return {'weight_data_types': '', 'input_data_types': ''}
+    github_url  = measurements_url
+    measurements_json_file_name =  find_match(get_json_files(github_url), f"""^{platform}.*\\.json$""")
+    measurements_json = f"""{github_url}{measurements_json_file_name}"""
+    measurements_json_raw = measurements_json.replace("github.com", "raw.githubusercontent.com").replace("/tree/", "/")
+    import urllib.request
+    with urllib.request.urlopen(measurements_json_raw) as url:
+        data = json.load(url)
+    return data
+'''
+
 def construct_table(category, division, availability):
     # Initialize the HTML table with the header
-    html = f"""<div id="results_table_{availability}" class="resultstable_wrapper"> <table class="resultstable tablesorter" id="results_{availability}">"""
+    html = f"""<div id="results_table_{availability}" class="resultstable_wrapper"> <table class="resultstable tablesorter tableclosed tabledatacenter" id="results_{availability}">"""
     html += "<thead> <tr>"
     
     # Table header
@@ -181,6 +244,7 @@ def construct_table(category, division, availability):
 
     location_pre = "https://github.com/mlcommons/inference_results_v4.0/tree/main/"
     result_link_text = "See result logs"
+    result_link_text = ""
     for rid in mydata:
         extra_sys_info = f"""
 Processor: {mydata[rid]['Processor']}
@@ -206,11 +270,28 @@ Notes: {mydata[rid]['Notes']}
         for m in models:
             if mydata[rid].get(m):
                 if mydata[rid][m].get('Server'):
-                    html += f"""
-                        <td class="col-result"><a target="_blank" title="{result_link_text}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
+                    github_server_url  = f"""{location_pre}{mydata[rid][m]['Server']['Location'].replace("results", "measurements")}/"""
+                    '''server_precision_info = get_precision_info( github_server_url, mydata[rid]['Platform'])
+                    extra_model_info = f"""Weight data types: {server_precision_info['weight_data_types']}
+Input data types: {server_precision_info['input_data_types']}
                     """
+                    '''
+                    extra_model_info = f"""Model precision: {mydata[rid][m]['Server']['weight_data_types']}"""
+                    #print(server_precision_info)
+                    
+                    html += f"""
+                        <td class="col-result"><a target="_blank" title="{result_link_text}{extra_model_info}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Server']['Performance_Result'],1)} </a> </td>
+                    """
+                github_offline_url  = f"""{location_pre}{mydata[rid][m]['Offline']['Location'].replace("results", "measurements")}/"""
+                extra_model_info = f"""Model precision: {mydata[rid][m]['Offline']['weight_data_types']}"""
+                '''
+                offline_precision_info = get_precision_info( github_offline_url, mydata[rid]['Platform'])
+                extra_model_info = f"""Weight data types: {offline_precision_info['weight_data_types']}
+Input data types: {offline_precision_info['input_data_types']}
+                    """
+                '''
                 html += f"""
-                <td class="col-result"><a target="_blank" title="{result_link_text}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
+                <td class="col-result"><a target="_blank" title="{result_link_text}{extra_model_info}" href="{location_pre}{mydata[rid][m]['Offline']['Location']}"> {round(mydata[rid][m]['Offline']['Performance_Result'],1)} </a> </td>
                 """
             else:
                 html += f"""
@@ -238,7 +319,7 @@ def construct_summary_table(category, division):
     html  = ""
     html += """
     <div class="counttable_wrapper">
-    <table class="tablesorter counttable">
+    <table class="tablesorter counttable" id="results_summary">
     <thead>
     <tr>
     <th class="count-submitter">Submitter</th>
@@ -294,35 +375,6 @@ def construct_summary_table(category, division):
     html += "</table></div>"
     return html
 
-def construct_summary_charts(category, division):
-    summary_data, count_data = getsummarydata(data, category, division)
-    # number of submission per each submitter
-    # the output should be a list of dictionary [{x:, y:number}]
-    no_of_submissions_by_submitter = []
-    for submitter, item in count_data.items():
-        item_data = {"indexLabel": submitter}
-        for m in models:
-            if submitter not in item_data:
-                item_data['y'] = item.get(m, 0) # assign the number of submissions as 0 initially if the model m is not submitted bu submitter
-            else:
-                item_data['y'] += int(item.get(m,0))
-        no_of_submissions_by_submitter.append(item_data)
-    pie_chart_data = f"""
-<script type='text/javascript'>
-    var dataPointsSubmittervsSubmission = {no_of_submissions_by_submitter};
-    alert(dataPointsSubmittervsSubmission)
-</script>
-    """
-    return pie_chart_data      
-
-
-
-
-
-
-
-
-
 categories = { "datacenter" : "Datacenter",
               "edge": "Edge"
               }
@@ -331,6 +383,61 @@ divisions= {
         "open": "Open"
         }
 
+def generate_html_form(categories, divisions, selected_category=None, selected_division=None, with_power=None):
+    # Setting default values if not provided
+    if not selected_category:
+        selected_category = ''
+    if not selected_division:
+        selected_division = ''
+    if with_power is None:
+        with_power = 'false'
+
+    # Create select options for categories and divisions
+    def generate_select_options(options, selected_value):
+        html = ""
+        for key, value in options.items():
+            selected = 'selected' if key == selected_value else ''
+            html += f"<option value='{key}' {selected}>{value}</option>\n"
+        return html
+
+    category_options = generate_select_options(categories, selected_category)
+    division_options = generate_select_options(divisions, selected_division)
+
+    # Generate the HTML for the form
+    html_form = f"""
+    <form id="resultSelectionForm" method="post" action="">
+        <h3>Select Category and Division</h3>
+
+        <div class="form-field">
+            <label for="category">Category</label>
+            <select id="category" name="category" class="col">
+                {category_options}
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="division">Division</label>
+            <select id="division" name="division" class="col">
+                {division_options}
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="with_power">Power</label>
+            <select id="with_power" name="with_power" class="col">
+                <option value="true" {'selected' if with_power == 'true' else ''}>Performance and Power</option>
+                <option value="false" {'selected' if with_power == 'false' else ''}>Performance</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <button type="submit" name="submit" value="1" id="results_tablesorter">Submit</button>
+        </div>
+    </form>
+    """
+
+    return html_form
+
 availabilities = ["Available", "Preview", "RDI" ]
 #availabilities = ["Available" ]
 division="closed"
@@ -338,16 +445,14 @@ category="datacenter"
 html = ""
 for availability in availabilities:
     val = availability.lower()
-    pager_class= f"pager_{val}"
-    tableposhtmlval = tableposhtml.replace("PAGER_CLASS", pager_class)
     html_table = construct_table(category, division, val)
 
     if html_table:
         html += f"""
-        <h2>{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
-{tableposhtmlval}
+        <h2 id="results_heading_{availability.lower()}" class="results_table_heading">{categories[category]} Category: {availability} submissions in {divisions[division]} division</h2>
+{tableposhtml}
 {html_table}
-{tableposhtmlval}
+{tableposhtml}
 <hr>
 """
 summary = construct_summary_table(category, division)
@@ -357,6 +462,13 @@ html += f"""
 {summary}
 <hr>
 """
+
+html += """
+    <div id="submittervssubmissionchartContainer" class="bgtext" style="height:370px; width:80%; margin:auto;"></div>
+    <div id="modelvssubmissionchartContainer" class="bgtext" style="height:370px; width:80%; margin:auto;"></div>
+    """
+
+html += generate_html_form(categories, divisions)
 
 
 html += f"""
@@ -371,10 +483,8 @@ extra_scripts = """
 var sortcolumnindex = 4, perfsortorder = 1;
 </script>
 
+<!--<script type="text/javascript" src="javascripts/tablesorter.js"></script>-->
 <script type="text/javascript" src="javascripts/results_tablesorter.js"></script>
-<script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
-<script type="text/javascript" src="javascripts/results_submitter_analysis.js"></script>
-
 """
 
 out_html = f"""---
@@ -393,60 +503,5 @@ with open(os.path.join("docs", "index.md"), "w") as f:
 
 
 #print(data)
-def generate_html_form(platforms, models_all, data1=None, data2=None, modelsdata=None):
-    # Setting default values if not provided
-    if not data1:
-        data1 = ''
-    if not data2:
-        data2 = ''
-    if not modelsdata:
-        modelsdata = 'All models'
 
-    # Create select options for system 1 and system 2
-    def generate_select_options(options, selected_value):
-        html = ""
-        for key, value in options.items():
-            selected = 'selected' if key == selected_value else ''
-            html += f"<option value='{key}' {selected}>{value}</option>\n"
-        return html
-
-    system1_options = generate_select_options(platforms, data1)
-    system2_options = generate_select_options(platforms, data2)
-
-    # Create select options for models
-    models_options = generate_select_options(models_all, modelsdata)
-
-    # Generate the HTML for the form
-    html_form = f"""
-    <form id="compareform"  method="post" action="">
-        <h3>Compare Results</h3>
-
-        <div class="form-field">
-            <label for="system1">System 1</label>
-            <select id="system1" name="system1" class="col">
-                {system1_options}
-            </select>
-        </div>
-
-        <div class="form-field">
-            <label for="system2">System 2</label>
-            <select id="system2" name="system2" class="col">
-                {system2_options}
-            </select>
-        </div>
-
-        <div class="form-field">
-            <label for="models">Models</label>
-            <select id="models" name="models[]" class="col" multiple>
-                {models_options}
-            </select>
-        </div>
-
-        <div class="form-field">
-            <button type="submit" name="okthen" value="1" id="compare_results">Compare SUTs</button>
-        </div>
-    </form>
-    """
-
-    return html_form
 
