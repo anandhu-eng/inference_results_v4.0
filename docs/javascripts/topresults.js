@@ -70,7 +70,7 @@ $(document).ready(function() {
         values = ["llama2-70b-99.9", scenario];
         myData = filterData(myData, keys, values);
         //console.log(myData);
-        $("#model").append('<option value="llama2-70b-99.9">Llama 2</option>');
+        $("#model").append('<option selected value="llama2-70b-99.9">Llama 2</option>');
         var devices = getUniqueValuesCombined(myData, " x ", [ "Accelerator", "a#" ]);
         var platforms = getUniqueValuesCombined(myData, " : ", [ "version", "Platform" ]);
         var scenarios = validScenarios["datacenter"];// getUniqueValues(myData, "Scenario");

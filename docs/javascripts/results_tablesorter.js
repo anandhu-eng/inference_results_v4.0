@@ -12,7 +12,7 @@ $(document).ready(function() {
     }).get();
 
     readAllData().then(function(allData) {
-        //  console.log(allData);
+        //console.log(allData);
         constructChartFromSummary(allData, category, division, with_power[0]);
     }).catch(function(error) {
         console.error(error);
@@ -67,7 +67,7 @@ function constructChartFromSummary(data, category, division, with_power) {
     }
     else {
         models = models_datacenter;
-        console.log("datacenter");
+        //console.log("datacenter");
     }
 
     // Loop for getting submitters vs number of submissions count

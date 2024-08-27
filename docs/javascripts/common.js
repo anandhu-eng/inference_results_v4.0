@@ -13,113 +13,71 @@ const dbName = "mlperf_inference";
 const dbVersion = 4;
 const objStore = "inference_results";
 
-/*
-function fetchSummaryData() {
-    // Open (or create) the database
-    var request = indexedDB.open(dbName, dbVersion);
-    //console.log(request)
+async function fetchAndStoreData(db) {
+    try {
+        const data = await $.getJSON("https://raw.githubusercontent.com/GATEOverflow/inference_results_v4.0/main/summary_results.json");
 
-    request.onsuccess = function(event) {
-        console.log("Database opened successfully!");
-        var db = event.target.result; // Get the database instance
-
-        // You can check if the object store exists here if needed
-        if (db.objectStoreNames.contains(objStore)) {
-            console.log("Object store exists.");
-        } else {
-            // Create an object store with "Location" as the keyPath
-            if (!db.objectStoreNames.contains(objStore)) {
-                var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
-                console.log("object store created")
-            }
-            fetchAndStoreData(db);
-            console.log("Object store does not exist.");
-        }
-    };
-
-    request.onerror = function(event) {
-        console.error("Error opening IndexedDB: " + event);
-    };
-
-
-    request.onupgradeneeded = function(event) {
-        var db = event.target.result;
-        console.log(event.oldVersion);
-        if((dbVersion - event.oldVersion) > 0) {
-            if (db.objectStoreNames.contains(objStore)) {
-                db.deleteObjectStore(objStore);
-                console.log("Old object store removed");
-            }
-        }
-
-        // Create an object store with "Location" as the keyPath
-        if (!db.objectStoreNames.contains(objStore)) {
-            var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
-            console.log("object store created")
-        }
-        fetchAndStoreData(db);
-
-
-    };
-
-
-}*/
-
-function fetchAndStoreData(db) {
-    $.getJSON("https://raw.githubusercontent.com/GATEOverflow/inference_results_v4.0/main/summary_results.json", function(data) {
         // Begin a transaction to save data in IndexedDB
-        var transaction = db.transaction([objStore], "readwrite");
-        var objectStore = transaction.objectStore(objStore);
+        const transaction = db.transaction([objStore], "readwrite");
+        const objectStore = transaction.objectStore(objStore);
 
-        var count = 0;
-        for(i = 0; i < data.length; i++) {
-            item = data[i];
-            var request = objectStore.add(item);
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i];
+            const request = objectStore.add(item);
+
             request.onsuccess = function(event) {
-                if(i % 1000 === 0)
-                    console.log("Data has been added to your database, record:", i+1);
+                if (i % 1000 === 0)
+                    console.log("Data has been added to your database, record:", i + 1);
             };
 
             request.onerror = function(event) {
-                //console.error("Error adding data: " + event.target.errorCode+ event.target);
-                //console.log(item);
+                console.error("Error adding data: " + event.target.errorCode);
             };
         }
 
-        transaction.oncomplete = function() {
-            console.log("All data has been successfully added to IndexedDB.");
-        };
+        return new Promise((resolve, reject) => {
+            transaction.oncomplete = function() {
+                console.log("All data has been successfully added to IndexedDB.");
+                resolve();
+            };
 
-        transaction.onerror = function(event) {
-            console.error("Transaction error: " + event.target.errorCode);
-        };
-    }).fail(function(jqxhr, textStatus, error) {
-        console.error("Request Failed: " + textStatus + ", " + error);
-    });
+            transaction.onerror = function(event) {
+                console.error("Transaction error: " + event.target.errorCode);
+                reject(event.target.errorCode);
+            };
+        });
+
+    } catch (error) {
+        console.error("Request Failed: ", error);
+    }
 }
 
-// read all data from database
+// Read all data from the database
 function readAllData() {
     return new Promise((resolve, reject) => {
         // Open the database
-        var request = indexedDB.open(dbName, dbVersion);
+        const request = indexedDB.open(dbName, dbVersion);
 
-        request.onsuccess = function(event) {
-            var db = event.target.result;
+        request.onsuccess = async function(event) {
+            const db = event.target.result;
+
+            // Ensure the object store exists
             if (!db.objectStoreNames.contains(objStore)) {
-                var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
-                console.log("object store created")
-                fetchAndStoreData(db);
+                const objectStore = db.createObjectStore(objStore, { autoIncrement: true });
+                console.log("Object store created");
+                await fetchAndStoreData(db);
             }
-            var transaction = db.transaction([objStore], "readonly");
-            var objectStore = transaction.objectStore(objStore);
+
+            // Start a transaction to read data
+            const transaction = db.transaction([objStore], "readonly");
+            const objectStore = transaction.objectStore(objStore);
 
             // Open a cursor to iterate through all records
-            var data = [];
-            var cursorRequest = objectStore.openCursor();
+            const data = [];
+            const cursorRequest = objectStore.openCursor();
 
             cursorRequest.onsuccess = function(event) {
-                var cursor = event.target.result;
+                const cursor = event.target.result;
                 if (cursor) {
                     data.push(cursor.value); // Push each record to the data array
                     cursor.continue(); // Move to the next record
@@ -133,33 +91,33 @@ function readAllData() {
             };
         };
 
-         request.onerror = function(event) {
-        console.error("Error opening IndexedDB: " + event);
-    };
+        request.onerror = function(event) {
+            reject("Error opening IndexedDB: " + event.target.errorCode);
+        };
 
+        request.onupgradeneeded = async function(event) {
+            const db = event.target.result;
+            console.log("Old DB Version: ", event.oldVersion);
 
-      request.onupgradeneeded = function(event) {
-        var db = event.target.result;
-        console.log(event.oldVersion);
-        if((dbVersion - event.oldVersion) > 0) {
-            if (db.objectStoreNames.contains(objStore)) {
-                db.deleteObjectStore(objStore);
-                console.log("Old object store removed");
+            if (event.oldVersion < dbVersion) {
+                if (db.objectStoreNames.contains(objStore)) {
+                    db.deleteObjectStore(objStore);
+                    console.log("Old object store removed");
+                }
+
+                const objectStore = db.createObjectStore(objStore, { autoIncrement: true });
+                console.log("New object store created");
+
+                // Fetch and store data after creating the object store
+                await fetchAndStoreData(db);
             }
-        }
-
-        // Create an object store with "Location" as the keyPath
-        if (!db.objectStoreNames.contains(objStore)) {
-            var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
-            console.log("object store created")
-        }
-        fetchAndStoreData(db);
-
-
-    };
-
+        };
     });
 }
+
+
+
+
 
 // for collapsable items
 document.addEventListener("DOMContentLoaded", function() {
