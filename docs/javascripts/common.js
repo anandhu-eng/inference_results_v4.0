@@ -22,7 +22,7 @@ function fetchSummaryData() {
     request.onsuccess = function(event) {
         console.log("Database opened successfully!");
         var db = event.target.result; // Get the database instance
-    
+
         // You can check if the object store exists here if needed
         if (db.objectStoreNames.contains(objStore)) {
             console.log("Object store exists.");
@@ -34,27 +34,25 @@ function fetchSummaryData() {
     request.onerror = function(event) {
         console.error("Error opening IndexedDB: " + event);
     };
-    
+
 
     request.onupgradeneeded = function(event) {
         var db = event.target.result;
         console.log(event.oldVersion);
-        switch (dbVersion - event.oldVersion) {
-            case 1:
-                if (db.objectStoreNames.contains(objStore)) {
-                    db.deleteObjectStore(objStore);
-                    console.log("Old object store removed");
-                }
-            default:
-
-                // Create an object store with "Location" as the keyPath
-                if (!db.objectStoreNames.contains(objStore)) {
-                    var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
-                    console.log("object store created")
-                }
-                fetchAndStoreData(db);
-
+        if((dbVersion - event.oldVersion) > 0) {
+            if (db.objectStoreNames.contains(objStore)) {
+                db.deleteObjectStore(objStore);
+                console.log("Old object store removed");
+            }
         }
+
+        // Create an object store with "Location" as the keyPath
+        if (!db.objectStoreNames.contains(objStore)) {
+            var objectStore = db.createObjectStore(objStore, { autoIncrement: true });
+            console.log("object store created")
+        }
+        fetchAndStoreData(db);
+
 
     };
 
@@ -169,7 +167,7 @@ function getUniqueValues(data, key) {
 
 function updateScenarioUnits(data) {
     $.each(data, function(index, item) {
-if (!scenarioUnits.hasOwnProperty(item['Scenario'])) {
+        if (!scenarioUnits.hasOwnProperty(item['Scenario'])) {
             scenarioUnits[item['Scenario']] = {}
             scenarioUnits[item['Scenario']]['Performance_Units'] = item['Performance_Units'];
         }
@@ -251,19 +249,19 @@ function buildSelectOption(array, selectId, selected=null) {
 
     $select = $('#'+selectId);
     $select.empty();
-$.each(array, function(index, value) {
-    if(selected && value == selected) {
-        sel_text = " selected ";
-    }
-    else {
-        sel_text = ""
-    }
-    let $option = $('<option '+sel_text+'></option>') // Create a new option element
-        .val(value.replace(/ /g, '_')) // Optionally set a value attribute
-        .text(value); // Set the display text
+    $.each(array, function(index, value) {
+        if(selected && value == selected) {
+            sel_text = " selected ";
+        }
+        else {
+            sel_text = ""
+        }
+        let $option = $('<option '+sel_text+'></option>') // Create a new option element
+            .val(value.replace(/ /g, '_')) // Optionally set a value attribute
+            .text(value); // Set the display text
 
-    $select.append($option); // Append the option to the select element
-});
+        $select.append($option); // Append the option to the select element
+    });
 }
 
 let tableposhtml = `
