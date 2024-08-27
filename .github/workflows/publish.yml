@@ -8,8 +8,7 @@ on:
     types: [published]
   push:
     branches:
-      - main
-      - docs
+      - newbranch
 
 jobs:
 
