@@ -9,8 +9,8 @@ var device_count_column_name = "#a";
 var additional_metric_column_name = "Performance per accelerator";
 var version = "v4.0";
 var openmodel=false;
-var sortcolumnindex = 6;
-var perfcolumnindex = 7; // starting from 1
+var sortcolumnindex = 5;
+var perfcolumnindex = 6; // starting from 1
 var chart1title = ''; //defined when selecting metric
 var chart2title = '';
 var chart3title = 'Accuracy vs Performance';
@@ -20,6 +20,8 @@ var chart3ytitle = 'Accuracy';
 var chart3xtitle = chart1ytitle;
 var perfsortorder = 1;
 var model='llama2-70b-99.9';
+$('#chartContainer3').hide();
+$('#printChart3').hide();
 
 function updateContent(myData) {
     model = $("#model").val();
