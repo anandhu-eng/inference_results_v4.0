@@ -108,7 +108,7 @@ function drawPerfCharts() {
 		}
 		count++;
 	}
-	console.log(modelsData3);
+	//console.log(modelsData3);
 	chart1Data = [], chart2Data = [], chart3Data = [];
 	for(var key in modelsData) {
 		var chart1data = {
@@ -258,7 +258,7 @@ if(document.getElementById("printChart3")) {
 
 
 
-$( document ).on( "click", "athead th", function() {
+$( document ).on( "click", "thead th", function() {
 	drawPerfCharts();
 });
 
