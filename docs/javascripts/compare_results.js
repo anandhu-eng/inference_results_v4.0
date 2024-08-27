@@ -145,7 +145,7 @@ function reConstructTables(system1, sysversion1, system2, sysversion2, selected_
     }
 
     values = [scenario, system2, sysversion2];
-    let result2 = filterData(data, keys, values, "selected_models", selected_models);
+    let result2 = filterDataFromValues(data, "Model", selected_models);
     //console.log(result1);
     //console.log(result2);
     if (result2.length === 0) {

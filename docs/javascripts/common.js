@@ -176,7 +176,7 @@ function getUniqueValuesCombined(data, sep, keys) {
     return uniqueValues;
 }
 
-function filterData(data, keys, values, extra_filter=null, models=[]) {
+function filterData(data, keys, values, extra_filter=null) {
     let filtered_data = [];
     if (!data) return filtered_data;
 
@@ -216,12 +216,6 @@ function filterData(data, keys, values, extra_filter=null, models=[]) {
                         break;
                     }
                 }
-                else if(extra_filter == "selected_models"){
-                    if (!models.includes(item['Model'] )) {
-                        mismatch = true;
-                        break;
-                    }
-                }
             }
         }
 
@@ -230,6 +224,53 @@ function filterData(data, keys, values, extra_filter=null, models=[]) {
         }
     });
 
+    return filtered_data;
+}
+
+function filterDataFromValues(data, key, values=[]) {
+    let filtered_data = [];
+    if (!data) return filtered_data;
+
+    data.forEach(function(item) {
+        let mismatch = false;
+        if (values.includes(item[key])) {
+            filtered_data.push(item);
+        }
+    });
+    return filtered_data;
+}
+
+function filterDataByAccelerators(data, acc_names, acc_nums) {
+    let filtered_data = [];
+    if (!data) return filtered_data;
+
+    data.forEach(function(item) {
+        let mismatch = false;
+        for(i=0; i< acc_names.length; i++) {
+            if((item['Accelerator'] == acc_names[i]) && (parseInt(item['a#']) == acc_nums[i]))
+                break;
+        }
+        if (i != acc_names.length) {
+            filtered_data.push(item);
+        }
+    });
+    return filtered_data;
+}
+
+function filterDataBySystems(data, systems, versions) {
+    let filtered_data = [];
+    if (!data) return filtered_data;
+
+    data.forEach(function(item) {
+        let mismatch = false;
+        for(i=0; i< systems.length; i++) {
+            if((item['Platform'] == systems[i]) && (item['version'] == versions[i]))
+                break;
+        }
+        if (i != systems.length) {
+            filtered_data.push(item);
+        }
+    });
     return filtered_data;
 }
 

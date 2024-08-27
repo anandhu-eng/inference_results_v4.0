@@ -55,7 +55,7 @@ $('html, body').animate({
 }
 
 $(document).ready(function() {
-     allData = [];
+    allData = [];
     readAllData().then(function(global_data) {
         //console.log(allData);
         allData = global_data;
@@ -260,7 +260,13 @@ $(document).ready(function() {
         var filter_systems = $('#filter_systems option:selected').map(function() {
             return $(this).text();
         }).get();
-        var filter_devices = $('#filter_devices').val();
+        /*var filter_device = $('#filter_devices option:selected').map(function() {
+            return $(this).text();
+        }).get();*/
+        var filter_devices = $('#filter_devices option:selected').map(function() {
+            return $(this).text();
+        }).get();
+       // var filter_device = $('#filter_devices').val();
 
         sortcolumnindex = 6;
         perfcolumnindex = 7; // starting from 1
@@ -335,6 +341,32 @@ $(document).ready(function() {
             $('#chartContainer2').show();
         }   
         myData = filterData(myData, keys, values, extra_filter);
+        
+        if (!filter_devices.includes("All devices")) {
+            acc_names = [];
+            acc_nums = [];
+            for(let filter_device of filter_devices) {
+                item = filter_device.split(" x ");
+                acc = item[0];
+                num = item[1];
+                acc_names.push(acc);
+                acc_nums.push(num);
+            }
+            myData = filterDataByAccelerators(myData, acc_names, acc_nums);
+        }
+         
+        if (!filter_systems.includes("All systems")) {
+            systems = [];
+            versions = [];
+            for(let filter_system of filter_systems) {
+                item = filter_system.split(" : ");
+                version = item[0];
+                system = item[1];
+                systems.push(system);
+                versions.push(version);
+            }
+            myData = filterDataBySystems(myData, systems, versions);
+        }
 
 
         updateContent(myData);

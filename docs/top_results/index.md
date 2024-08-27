@@ -21,7 +21,7 @@ hide:
 <button class="btn btn-primary"  id="printChart2">Download</button>
 
 <div id="chartContainer3" class="bgtext" style="height: 370px; width: 100%;"></div>
-<button class="btn btn-primary"  id="printChart3">Download</button>';
+<button class="btn btn-primary"  id="printChart3">Download</button>
 
 
 
@@ -89,7 +89,7 @@ hide:
 
         <div class="form-field">
             <label for="filter_devices">Filter Devices</label>
-            <select id="filter_devices" name="filter_devices" class="col">
+            <select id="filter_devices" name="filter_devices[]" class="col" multiple size="5">
             </select>
         </div>
 
