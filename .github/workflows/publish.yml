@@ -8,7 +8,7 @@ on:
     types: [published]
   push:
     branches:
-      - freshpull
+      - newbranch
       - docs
 
 jobs:
