@@ -9,7 +9,7 @@ hide:
 <h2 id="topresults_heading" class="results_table_heading"></h2>
 
         
-<div id="topresults_table_wrapper" class="resultstable_wrapper"> 
+<div id="topresults_table_wrapper" class="resultstable_wrapper">
 </div>
 
 <hr>
@@ -83,7 +83,7 @@ hide:
 
         <div class="form-field">
             <label for="filter_systems">Filter Systems</label>
-             <select id="filter_systems" name="filter_systems[]" class="col" multiple size="30">
+             <select id="filter_systems" name="filter_systems[]" class="col" multiple size="10">
             </select>
         </div>
 
