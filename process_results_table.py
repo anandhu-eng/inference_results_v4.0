@@ -471,6 +471,13 @@ html += """
 html += generate_html_form(categories, divisions)
 
 
+html += f"""
+<div id="ContainerSubmitterSubmissions" style="height: 300px; width: 100%;"></div>
+<div id="pieContainerSubmitterSubmissions" style="height: 300px; width: 100%;"></div>
+"""
+
+html += construct_summary_charts(category, division)
+
 extra_scripts = """
 <script type="text/javascript">
 var sortcolumnindex = 4, perfsortorder = 1;
