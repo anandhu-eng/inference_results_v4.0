@@ -39,6 +39,7 @@ $(document).ready(function() {
         readAllData().then(function(allData) {
             //  console.log(allData);
             reConstructTables(category, division, with_power[0], allData);
+            reConstructAccvsPerfChart(category, division, with_power[0], allData);
             constructChartFromSummary(allData, category, division, with_power[0]);
         }).catch(function(error) {
             console.error(error);
@@ -138,6 +139,16 @@ function drawChartResults(){
 
     submittervssubmissionchart.render();
     modelvssubmissionchart.render();
+}
+
+function reConstructAccvsPerfChart(category, division, with_power, data) {
+    availabilities = [ "Available", "Preview", "RDI" ]; 
+    availabilities.forEach(function(availability) {
+        // filtered data as per the user choice
+        const filteredResults = filterDataResultsTable(category, division, with_power, availability, data);
+        //console.log(filteredResults.length);
+        var html_table = constructAccvsPerfChart(category, division, with_power, availability, filteredResults);
+    });
 }
 
 function reConstructTables(category, division, with_power, data){
@@ -581,7 +592,8 @@ function constructOpenTableModel(model, category, with_power, availability, myda
     //console.log(html);
     return html;
 }
-function constructOpenTable(category, with_power, availability, data) {
+function constructOpenTable(category, division, with_power, availability, data) {
+    // var accuracyMatrix = ``;
     models = []
     if (category == "datacenter") {
         models = models_datacenter;
@@ -592,6 +604,22 @@ function constructOpenTable(category, with_power, availability, data) {
     html = ''
     models.forEach(function(model, index) {
         html += constructOpenTableModel(model, category, with_power, availability, data);
+        if (category === "datacenter" && division === "open") {
+            accuracy_matrices.forEach(function(matrix) {
+                // get the accuracy matrix from common.json(currently, the first matric is only utilised)
+                if (matrix.hasOwnProperty(model)) {
+                    let accuracyMetric = matrix[model][0];
+                    let resultTmp = filterForAccvsPerfPlot(data, model, category, division, accuracyMetric);
+                    if (resultTmp.length !== 0) {
+                        html += `
+                           <div id="AccVsPerfScatterPlot_${model}_${division}_${category}" style="height: 370px; width: 100%;"></div>
+    `                   ;
+                    }
+                }
+            });
+            
+        }
+        
     });
     //console.log(with_power);
     // html += "</table>";
@@ -601,8 +629,65 @@ function constructOpenTable(category, with_power, availability, data) {
     return html
 }
 
+function drawAccvsPerfPlot(category, division, with_power, availability, data) {
+    // the data here is the preprocessed data through function preprocessData
+    models = []
+    if (category == "datacenter") {
+        models = models_datacenter;
+    }
+    else{
+        models = models_edge;
+    }
+    models.forEach(function(model, index) {
+        let accuracyMetric = ``;
+        accuracy_matrices.forEach(function(matrix) {
+            // get the accuracy matrix from common.json(currently, the first metric is only utilised)
+            if (matrix.hasOwnProperty(model)) {
+                accuracyMetric = matrix[model][0];
+                console.log(filterForAccvsPerfPlot(data, model, category, division, accuracyMetric))
+            }
+        });
+        if (category === "datacenter" && division === "open") {
+            let filteredData = filterForAccvsPerfPlot(data, model, category, division, accuracyMetric);
+            if (filteredData.length !== 0) {
+                let chart = new CanvasJS.Chart(`AccVsPerfScatterPlot_${model}_${division}_${category}`, {
+                    animationEnabled: true,
+                    theme: "light2",
+                    title:{
+                      text: `Accuracy vs Performance for ${model}`
+                    },
+                    axisX:{
+                      title: "Performance"
+                    },
+                    axisY:{
+                      title: "Accuracy",
+                      includeZero: false
+                    },
+                    data: [{
+                      type: "scatter",
+                      toolTipContent: "<b>Submitter:</b> {Submitter}<br/><b>System:</b> {System}<br/><b>Scenario:</b> {Scenario}<br/><b>Performance:</b> {x}<br/><b>Accuracy:</b> {y}",
+                      dataPoints: filteredData
+                    }]
+                  });
+                chart.render();
+            }
+        }
+    });
+}
 
 
+
+function constructAccvsPerfChart(category, division, with_power, availability, data) {
+    var mydata = processData(data, category, division, availability)
+    if (!Object.keys(mydata).length) {
+        return null; // return if mydata is null
+    }
+    if(division == "open") {
+        html =  drawAccvsPerfPlot(category, division, with_power, availability, mydata);
+        //console.log(html);
+        return html;
+    }
+}
 
 function constructTable(category, division, with_power, availability, data) {
     let html = ``;
@@ -612,7 +697,7 @@ function constructTable(category, division, with_power, availability, data) {
     }
     var needsFooter = Object.keys(mydata).length > 5;
     if(division == "open") {
-        html =  constructOpenTable(category, with_power, availability, mydata);
+        html =  constructOpenTable(category, division, with_power, availability, mydata);
         //console.log(html);
         return html;
     }
@@ -884,6 +969,69 @@ function constructTable(category, division, with_power, availability, data) {
 }
 
 
+function filterForAccvsPerfPlot(processedData, modelName, category, division, accuracyMetric) {
+    const result = [];
+
+    for (const myId in processedData) {
+        const models = processedData[myId];
+        console.log(models[modelName]);
+        if(models[modelName]) {
+            console.log (models);
+            console.log(models.Category);
+            console.log(division);
+        }
+        
+        if (models[modelName] && models.Category === division) {
+            console.log(models.Category);
+            const scenarios = models[modelName];
+            for (const scenario in scenarios) {
+                const scenarioData = scenarios[scenario];
+                const accuracyValues = scenarioData.Accuracy;
+                // Accuracy value for the specific accuracy matrix would be extracted through this function
+                const accuracyValue = parseFloat(extractAccuracyValue(accuracyValues, accuracyMetric));
+                console.log(typeof(accuracyValue));
+                const details = {
+                    x: scenarioData.Performance_Result,
+                    y: accuracyValue,
+                    Submitter: models.Submitter,
+                    System: models.System,
+                    Scenario: scenario
+                    // These are the keys that could be enabled if required in the future
+                    // ID: myId,
+                    // Model: modelName,
+                    // // Scenario: scenario,
+                    // // has_power: scenarioData.has_power,
+                    // // Power_Result: scenarioData.Power_Result,
+                    // // Power_Units: scenarioData.Power_Units,
+                    // y: accuracyValue,
+                    // Scenario: scenario,
+                    // x: scenarioData.Performance_Result,
+                    // Performance_Units: scenarioData.Performance_Units,
+                    // Submitter: models.Submitter,
+                    // System: models.System
+                };
+
+                result.push(details);
+            }
+        }
+    }
+
+    return result;
+}
+
+function extractAccuracyValue(accuracyString, metric) {
+    console.log(`accuracy matrix is:${metric}`)
+    const accuracyEntries = accuracyString.split("  ");
+    console.log(`accuracy string:${accuracyString} and accuracy entries:${accuracyEntries}`)
+    for (const entry of accuracyEntries) {
+        const [key, value] = entry.split(":").map(str => str.trim());
+        if (key === metric) {
+            return parseFloat(value).toFixed(4); 
+        }
+    }
+    return null; 
+}
+
 
 function processData(data, category, division, availability) {
     const myData = {};
@@ -963,6 +1111,7 @@ function processData(data, category, division, availability) {
         }
         //console.log(scenarioUnits);
     });
+    // console.log(myData);
     return myData;
 }
 
