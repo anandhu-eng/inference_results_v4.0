@@ -147,7 +147,7 @@ function reConstructAccvsPerfChart(category, division, with_power, data) {
         // filtered data as per the user choice
         const filteredResults = filterDataResultsTable(category, division, with_power, availability, data);
         //console.log(filteredResults.length);
-        var html_table = constructAccvsPerfChart(category, division, with_power, availability, filteredResults);
+        constructAccvsPerfChart(category, division, with_power, availability, filteredResults);
     });
 }
 
@@ -644,7 +644,6 @@ function drawAccvsPerfPlot(category, division, with_power, availability, data) {
             // get the accuracy matrix from common.json(currently, the first metric is only utilised)
             if (matrix.hasOwnProperty(model)) {
                 accuracyMetric = matrix[model][0];
-                console.log(filterForAccvsPerfPlot(data, model, category, division, accuracyMetric))
             }
         });
         if (category === "datacenter" && division === "open") {
@@ -974,13 +973,6 @@ function filterForAccvsPerfPlot(processedData, modelName, category, division, ac
 
     for (const myId in processedData) {
         const models = processedData[myId];
-        console.log(models[modelName]);
-        if(models[modelName]) {
-            console.log (models);
-            console.log(models.Category);
-            console.log(division);
-        }
-        
         if (models[modelName] && models.Category === division) {
             console.log(models.Category);
             const scenarios = models[modelName];
