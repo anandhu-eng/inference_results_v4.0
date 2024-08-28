@@ -460,7 +460,6 @@ function constructOpenTableModel(model, category, with_power, availability, myda
     if(needsFooter) {
         html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
     }
-    //console.log("here")
 
     validData = false
     for (let rid in mydata) {
@@ -534,7 +533,7 @@ function constructOpenTableModel(model, category, with_power, availability, myda
 }
 function constructOpenTable(category, division, with_power, availability, data) {
     // var accuracyMatrix = ``;
-    console.log(accuracyUnits)
+    // console.log(accuracyUnits)
     models = []
     if (category == "datacenter") {
         models = models_datacenter;
@@ -786,7 +785,6 @@ function constructTable(category, division, with_power, availability, data) {
     if(needsFooter) {
         html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
     }
-    //console.log("here")
 
 
     for (let rid in mydata) {
@@ -847,9 +845,9 @@ function constructTable(category, division, with_power, availability, data) {
 }
 
 function extractAccuracyValue(accuracyString, metric) {
-    console.log(`accuracy matrix is:${metric}`)
+    // console.log(`accuracy matrix is:${metric}`)
     const accuracyEntries = accuracyString.split("  ");
-    console.log(`accuracy string:${accuracyString} and accuracy entries:${accuracyEntries}`)
+    // console.log(`accuracy string:${accuracyString} and accuracy entries:${accuracyEntries}`)
     for (const entry of accuracyEntries) {
         const [key, value] = entry.split(":").map(str => str.trim());
         if (key === metric) {

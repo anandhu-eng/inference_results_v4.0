@@ -69,14 +69,14 @@ function filterForAccvsPerfPlot(processedData, modelName, category, division, ac
     for (const myId in processedData) {
         const models = processedData[myId];
         if (models[modelName] && models.Category === division) {
-            console.log(models.Category);
+            // console.log(models.Category);
             const scenarios = models[modelName];
             for (const scenario in scenarios) {
                 const scenarioData = scenarios[scenario];
                 const accuracyValues = scenarioData.Accuracy;
                 // Accuracy value for the specific accuracy matrix would be extracted through this function
                 const accuracyValue = parseFloat(extractAccuracyValue(accuracyValues, accuracyMetric));
-                console.log(typeof(accuracyValue));
+                // console.log(typeof(accuracyValue));
                 let markerType;
                 switch (scenario) {
                     case "Offline":
