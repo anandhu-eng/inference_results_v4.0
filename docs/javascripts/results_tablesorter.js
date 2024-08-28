@@ -10,8 +10,9 @@ $(document).ready(function() {
     var with_power = $('#with_power option:selected').map(function() {
         return $(this).val() == "true";
     }).get();
+
     readAllData().then(function(allData) {
-        //  console.log(allData);
+        //console.log(allData);
         constructChartFromSummary(allData, category, division, with_power[0]);
     }).catch(function(error) {
         console.error(error);
@@ -38,6 +39,7 @@ $(document).ready(function() {
         readAllData().then(function(allData) {
             //  console.log(allData);
             reConstructTables(category, division, with_power[0], allData);
+            reConstructAccvsPerfChart(category, division, with_power[0], allData);
             constructChartFromSummary(allData, category, division, with_power[0]);
         }).catch(function(error) {
             console.error(error);
@@ -45,58 +47,8 @@ $(document).ready(function() {
     }
     );
 
-    fetchSummaryData();
+    //fetchSummaryData();
 });
-
-function constructChartFromSummary(data, category, division, with_power) {
-    const [summaryData, countData] = getSummaryData(data, category, division, with_power);
-
-    let html = "";
-    html += `
-        <div id="submittervssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
-        <div id="modelvssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
-    `;
-
-    let submitterVsSubmissionsCntTmp = {};
-    let modelsVsSubmissionsCntTmp = {};
-
-    if ( category==="edge" ) {
-        models = models_edge;
-        //console.log("edgecategory");
-    }
-    else {
-        models = models_datacenter;
-        console.log("datacenter");
-    }
-
-    // Loop for getting submitters vs number of submissions count
-    for (const [submitter, item] of Object.entries(countData)) {
-        let cnt = 0;
-        for (const m of models) {
-            if (item[m] !== undefined && item[m] !== '') {
-                cnt += item[m];
-                if (modelsVsSubmissionsCntTmp[m] === undefined) {
-                    modelsVsSubmissionsCntTmp[m] = item[m];
-                } else {
-                    modelsVsSubmissionsCntTmp[m] += item[m];
-                }
-            }
-        }
-        submitterVsSubmissionsCntTmp[submitter] = cnt;
-    }
-
-    submitterVsSubmissionsCnt = Object.entries(submitterVsSubmissionsCntTmp).map(([key, value]) => ({
-        label: key,
-        y: value
-    }));
-
-    modelsVsSubmissionsCnt = Object.entries(modelsVsSubmissionsCntTmp).map(([key, value]) => ({
-        label: key,
-        y: value
-    }));
-
-    drawChartResults();
-}
 
 function drawChartResults(){
     var submittervssubmissionchart = new CanvasJS.Chart("submittervssubmissionchartContainer", {
@@ -143,7 +95,7 @@ function reConstructTables(category, division, with_power, data){
     availabilities = [ "Available", "Preview", "RDI" ]; 
     availabilities.forEach(function(availability) {
         // filtered data as per the user choice
-        const filteredResults = filterData(category, division, with_power, availability, data);
+        const filteredResults = filterDataResultsTable(category, division, with_power, availability, data);
         //console.log(filteredResults.length);
         var html_table = constructTable(category, division, with_power, availability, filteredResults);
         var tableHeading = `${category} Category: ${availability} submissions in ${division} division`;
@@ -508,7 +460,6 @@ function constructOpenTableModel(model, category, with_power, availability, myda
     if(needsFooter) {
         html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
     }
-    //console.log("here")
 
     validData = false
     for (let rid in mydata) {
@@ -580,7 +531,9 @@ function constructOpenTableModel(model, category, with_power, availability, myda
     //console.log(html);
     return html;
 }
-function constructOpenTable(category, with_power, availability, data) {
+function constructOpenTable(category, division, with_power, availability, data) {
+    // var accuracyMatrix = ``;
+    // console.log(accuracyUnits)
     models = []
     if (category == "datacenter") {
         models = models_datacenter;
@@ -591,6 +544,19 @@ function constructOpenTable(category, with_power, availability, data) {
     html = ''
     models.forEach(function(model, index) {
         html += constructOpenTableModel(model, category, with_power, availability, data);
+        if (category === "datacenter" && division === "open") {
+            if (accuracyUnits.hasOwnProperty(model)) {
+                let accuracyMetric = accuracyUnits[model].split(",")[0].trim();
+                let resultTmp = filterForAccvsPerfPlot(data, model, category, division, accuracyMetric);
+                if (resultTmp.length !== 0) {
+                    html += `
+                       <div id="AccVsPerfScatterPlot_${model}_${division}_${category}" style="height: 370px; width: 100%;"></div>
+`                   ;
+                }
+            }
+            
+        }
+        
     });
     //console.log(with_power);
     // html += "</table>";
@@ -600,9 +566,6 @@ function constructOpenTable(category, with_power, availability, data) {
     return html
 }
 
-
-
-
 function constructTable(category, division, with_power, availability, data) {
     let html = ``;
     var mydata = processData(data, category, division, availability)
@@ -611,7 +574,7 @@ function constructTable(category, division, with_power, availability, data) {
     }
     var needsFooter = Object.keys(mydata).length > 5;
     if(division == "open") {
-        html =  constructOpenTable(category, with_power, availability, mydata);
+        html =  constructOpenTable(category, division, with_power, availability, mydata);
         //console.log(html);
         return html;
     }
@@ -822,7 +785,6 @@ function constructTable(category, division, with_power, availability, data) {
     if(needsFooter) {
         html += `<tfoot> <tr>${tableheader}</tr></tfoot>`;
     }
-    //console.log("here")
 
 
     for (let rid in mydata) {
@@ -882,6 +844,18 @@ function constructTable(category, division, with_power, availability, data) {
     return html
 }
 
+function extractAccuracyValue(accuracyString, metric) {
+    // console.log(`accuracy matrix is:${metric}`)
+    const accuracyEntries = accuracyString.split("  ");
+    // console.log(`accuracy string:${accuracyString} and accuracy entries:${accuracyEntries}`)
+    for (const entry of accuracyEntries) {
+        const [key, value] = entry.split(":").map(str => str.trim());
+        if (key === metric) {
+            return parseFloat(value).toFixed(4); 
+        }
+    }
+    return null; 
+}
 
 
 function processData(data, category, division, availability) {
@@ -962,12 +936,13 @@ function processData(data, category, division, availability) {
         }
         //console.log(scenarioUnits);
     });
+    // console.log(myData);
     return myData;
 }
 
 
 // function to filter data in according to the user selection
-function filterData(category, division, with_power, availability, data) {
+function filterDataResultsTable(category, division, with_power, availability, data) {
     const result = []; // Initialize an empty object to hold the filtered results
 
     data.forEach(item => {

@@ -10,7 +10,7 @@ on:
     branches:
       - newbranch
       - main
-      - docss
+      - docs
 
 jobs:
 

@@ -6,11 +6,11 @@ $( document ).on( "click", "#results thead th", function() {
 
 var device_column_name = "Accelerator";
 var device_count_column_name = "#a";
-var additional_metric_column_name = "Performance per accelerator";
+var additional_metric_column_name = "";
 var version = "v4.0";
 var openmodel=false;
-var sortcolumnindex = 5;
-var perfcolumnindex = 6; // starting from 1
+var sortcolumnindex = 6;
+var perfcolumnindex = 7; // starting from 1
 var chart1title = ''; //defined when selecting metric
 var chart2title = '';
 var chart3title = 'Accuracy vs Performance';
@@ -22,13 +22,17 @@ var perfsortorder = 1;
 var model='llama2-70b-99.9';
 $('#chartContainer3').hide();
 $('#printChart3').hide();
+$('#chartContainer2').hide();
+$('#printChart2').hide();
 
 function updateContent(myData) {
+    //$("#topresults_table_wrapper").focus();
     model = $("#model").val();
     scenario = $("#scenario").val();
     division = $("#division").val(); 
     metric = $("#metric").val(); 
     //updateScenarioUnits(myData);
+    $("#topresults_heading").text(`${model} results in ${category} category, ${division} division`);
     tablehtml = constructTable(division, scenario, model, metric, myData);
     //console.log(division+scenario);
     //console.log(tablehtml);
@@ -45,10 +49,13 @@ function updateContent(myData) {
         //drawPowerChart();
         drawPerfCharts();
     });
-
+$('html, body').animate({
+            scrollTop: 0
+        }, 'slow');
 }
 
 $(document).ready(function() {
+    allData = [];
     readAllData().then(function(global_data) {
         //console.log(allData);
         allData = global_data;
@@ -58,21 +65,27 @@ $(document).ready(function() {
         var models = getUniqueValues(myData, "Model");
         scenario = "Offline";
         division = "closed"; 
+        category = "datacenter";
         keys = ["Model", "Scenario"];
         values = ["llama2-70b-99.9", scenario];
         myData = filterData(myData, keys, values);
         //console.log(myData);
-        $("#model").append('<option value="llama2-70b-99.9">Llama 2</option>');
-    var platforms = getUniqueValues(myData, "Platform");
-    var accelerators = getUniqueValues(myData, "Accelerator");
-    var devices = getUniqueValuesCombined(myData, " x ", [ "Accelerator", "a#" ]);
-    var platforms = getUniqueValuesCombined(myData, " : ", [ "version", "Platform" ]);
-    var scenarios = validScenarios["datacenter"];// getUniqueValues(myData, "Scenario");
-    model = $("#model").val();
-    updateScenarioUnits(myData);
-    buildSelectOption(models, "model", model);
-    buildSelectOption(scenarios, "scenario", scenario);
-    buildSelectOption(platforms, "filter_systems");
+        $("#model").append('<option selected value="llama2-70b-99.9">Llama 2</option>');
+        var devices = getUniqueValuesCombined(myData, " x ", [ "Accelerator", "a#" ]);
+        var platforms = getUniqueValuesCombined(myData, " : ", [ "version", "Platform" ]);
+        var scenarios = validScenarios["datacenter"];// getUniqueValues(myData, "Scenario");
+        model = $("#model").val();
+        updateScenarioUnits(myData);
+        buildSelectOption(models, "model", model);
+        buildSelectOption(scenarios, "scenario", scenario);
+        platforms.unshift("All systems");
+        buildSelectOption(platforms, "filter_systems", "All systems");
+        devices.unshift("All devices");
+        buildSelectOption(devices, "filter_devices", "All devices");
+        charttitlesuffix = ` for ${model} ${scenario} scenario in ${division} division ${category} category`;
+        chart1title = "Performance " + charttitlesuffix;
+       // chart2title = "Performance per accelerator " + charttitlesuffix;
+        //chart2ytitle = "Samples per second per accelerator";
         updateContent(myData);
     }).catch(function(error) {
         console.error(error);
@@ -86,6 +99,7 @@ function constructTable(division, scenario, model, metric, result) {
     //console.log(metric);
     let html = tableposhtml;
     let theader = `
+        <th>ID</th>
         <th>System</th>
         <th>Submitter</th>
         <th>${device_column_name}</th>
@@ -93,7 +107,8 @@ function constructTable(division, scenario, model, metric, result) {
         <th>Framework</th>
     `;
 
-    if (division === "open") {
+    if (division == "open") {
+        openmodel = true;
         theader += `
             <th>Model</th>
             <th>Accuracy</th>
@@ -126,12 +141,13 @@ function constructTable(division, scenario, model, metric, result) {
         const resultid = row.ID;
         const location = `https://github.com/mlcommons/inference_results_${version}/tree/main/${row.Location}`;
         // html += `<td title="${resultid}" class='location'><a target="_blank" href="${location}">${platform}</a></td>`;
+        html += `<td title="${platform}">${row.ID}</td>`;
         html += `<td title="${platform}">${row.System}</td>`;
         html += `<td>${row.Submitter}</td>`;
 
-        if (row["a#"] == 0) {
+        if (!(row["a#"] > 0)) {
             cores = row.Nodes * row.host_processors_per_node * row.host_processor_core_count;
-            html += `<td>${row.host_processor_model_name}</td>`;
+            html += `<td>${row.Processor}</td>`;
             html += `<td>${cores}</td>`;
         } else {
             html += `<td>${row.Accelerator}</td>`;
@@ -140,9 +156,13 @@ function constructTable(division, scenario, model, metric, result) {
 
         html += `<td>${row.Software}</td>`;
 
-        if (division === "open") {
-            html += `<td>${row.Model}</td>`;
-            html += `<td>${row.Accuracy}</td>`;
+        if (division == "open") {
+            html += `<td>${row.UsedModel}</td>`;
+            acc__ = row.Accuracy.split("  ")
+            acc_ = acc__[0].split(":")
+            acc = parseFloat(acc_[1])
+
+            html += `<td>${acc}</td>`;
         }
 
         html += `<td class='performance' title='${performance_title}'>${row.Performance_Result.toFixed(2)}</td>`;
@@ -189,6 +209,43 @@ function constructTable(division, scenario, model, metric, result) {
 
 
 $(document).ready(function() {
+    $('.myFilter').on('change', function() {
+        var category = $('#category').val();
+        var division = $('#division').val();
+        var availability = $('#availability').val();
+        var model = $('#model').val();
+        var scenario = $('#scenario').val();
+        keys = [ "Suite", "Category", "Availability" ];
+        values = [ category, division, availability ];
+        //console.log(allData);
+        myData = filterData(allData, keys, values);
+        //console.log(scenario);
+        var models = getUniqueValues(myData, "Model");
+        var devices = getUniqueValuesCombined(myData, " x ", [ "Accelerator", "a#" ]);
+        var platforms = getUniqueValuesCombined(myData, " : ", [ "version", "Platform" ]);
+        var scenarios = validScenarios["datacenter"];// getUniqueValues(myData, "Scenario");
+        platforms.unshift("All systems");
+        devices.unshift("All devices");
+        buildSelectOption(models, "model", model);
+        buildSelectOption(scenarios, "scenario", scenario);
+        buildSelectOption(platforms, "filter_systems", "All systems");
+        buildSelectOption(devices, "filter_devices", "All devices");
+    });
+
+    $('#model').on('change', function() {
+        var category = $('#category').val();
+        var division = $('#division').val();
+        var availability = $('#availability').val();
+        var model = $('#model').val();
+        keys = [ "Suite", "Category", "Availability", "Model" ];
+        values = [ category, division, availability, model ];
+        //console.log(allData);
+        myData = filterData(allData, keys, values);
+        //console.log(scenario);
+        var scenarios = getUniqueValues(myData, "Scenario");
+        buildSelectOption(scenarios, "scenario", scenario);
+    });
+
     $('#resultSelectionForm').submit(function(event) {
         event.preventDefault(); // This will cancel the form submission
 
@@ -200,16 +257,19 @@ $(document).ready(function() {
         var scenario = $('#scenario').val();
         var metric = $('#metric').val();
         var model = $('#model').val();
-        var system2 = $('#system2 option:selected').text();
         var filter_systems = $('#filter_systems option:selected').map(function() {
             return $(this).text();
         }).get();
+        /*var filter_device = $('#filter_devices option:selected').map(function() {
+            return $(this).text();
+        }).get();*/
         var filter_devices = $('#filter_devices option:selected').map(function() {
             return $(this).text();
         }).get();
+       // var filter_device = $('#filter_devices').val();
 
-        sortcolumnindex = 5;
-        perfcolumnindex = 6; // starting from 1
+        sortcolumnindex = 6;
+        perfcolumnindex = 7; // starting from 1
 
         //console.log(division);
         if(division == "closed") {
@@ -229,33 +289,35 @@ $(document).ready(function() {
         myData = filterData(allData, keys, values);
         //console.log(scenario);
         var models = getUniqueValues(myData, "Model");
-        keys = ["Model", "Scenario"];
-        values = [model, scenario];
-        myData = filterData(myData, keys, values);
-
 
         additional_metric_column_name = "";
-        chart2title = "";
-        chart2ytitle = "";
         perfsortorder = 0;
         charttitlesuffix = ` for ${model} ${scenario} scenario in ${division} division ${category} category`;
+        keys = ["Model", "Scenario"];
+        values = [model, scenario];
+        extra_filter=null;
+
+        chart1title = "Performance " + charttitlesuffix;
 
         if (metric === 'performance') {
             device_column_name = "Device";
             device_count_column_name = "#devices";
             additional_metric_column_name = "";
+            chart1title = "Performance " + charttitlesuffix;
             $('#chartContainer2').hide();
             $('#printChart2').hide();
         } else if (metric === 'power_efficiency') {
+            extra_filter = "power";
             device_column_name = "Processor";
             device_count_column_name = "Total Physical Cores";
             additional_metric_column_name = "Samples per Joule";
             chart2title = "Power efficiency " + charttitlesuffix;
             chart2ytitle = "Samples per Joule";
-            sortcolumnindex = 6;
+            sortcolumnindex = 7;
             perfsortorder = 1;
             $('#chartContainer2').show();
         } else if (metric === 'performance_per_accelerator') {
+            extra_filter = "accelerator_only";
             device_column_name = "Accelerator";
             device_count_column_name = "#a";
             //filter = " and accelerators_per_node > 0";
@@ -263,21 +325,49 @@ $(document).ready(function() {
                 additional_metric_column_name = "Performance per accelerator";
                 chart2title = "Performance per accelerator " + charttitlesuffix;
                 chart2ytitle = "Samples per second per accelerator";
-                sortcolumnindex = 6;
+                sortcolumnindex = 7;
             }
             $('#chartContainer2').show();
        } else if (metric === 'performance_per_core') {
-            //filter = " and accelerators_per_node = 0";
+            extra_filter = "cpu_only";
             device_column_name = "Processor";
             device_count_column_name = "Total Physical Cores";
             if (scenario === "Offline") {
                 additional_metric_column_name = "Performance per core";
                 chart2title = "Performance per core " + charttitlesuffix;
                 chart2ytitle = "Samples per second per core";
-                sortcolumnindex = 6;
+                sortcolumnindex = 7;
             }
             $('#chartContainer2').show();
         }   
+        myData = filterData(myData, keys, values, extra_filter);
+        
+        if (!filter_devices.includes("All devices")) {
+            acc_names = [];
+            acc_nums = [];
+            for(let filter_device of filter_devices) {
+                item = filter_device.split(" x ");
+                acc = item[0];
+                num = item[1];
+                acc_names.push(acc);
+                acc_nums.push(num);
+            }
+            myData = filterDataByAccelerators(myData, acc_names, acc_nums);
+        }
+         
+        if (!filter_systems.includes("All systems")) {
+            systems = [];
+            versions = [];
+            for(let filter_system of filter_systems) {
+                item = filter_system.split(" : ");
+                version = item[0];
+                system = item[1];
+                systems.push(system);
+                versions.push(version);
+            }
+            myData = filterDataBySystems(myData, systems, versions);
+        }
+
 
         updateContent(myData);
         //console.log(myData);

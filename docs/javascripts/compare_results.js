@@ -113,9 +113,8 @@ $(document).ready(function() {
 
         // Optionally, you can handle the form data yourself
         */
-        var data;
         readAllData().then(function(allData) {
-            //console.log(allData);
+//            console.log(allData);
             sysversion1 = "v4.0";
             sysversion2 = "v4.0";
             reConstructTables(system1, sysversion1, system2, sysversion2, selected_models, allData);
@@ -125,18 +124,20 @@ $(document).ready(function() {
       }
     );
 
-        fetchSummaryData();
+        //fetchSummaryData();
 });
 
 // scenarios, system1, sysversion1, system2, sysversion2, data, ytitle_scenarios
 function reConstructTables(system1, sysversion1, system2, sysversion2, selected_models, data) {
-    scenarios = [ "Offline", "Server", "SingleStream", "MultiStream"];
-scenarios.forEach(function(scenario) {
+    myscenarios = [ "Offline", "Server", "SingleStream", "MultiStream"];
+
+    myscenarios.forEach(function(scenario) {
+
     let keys = ["Scenario", "Platform", "version"];
     let values = [scenario, system1, sysversion1];
     //console.log(scenario);    
 
-    let result1 = filterData(data, keys, values);
+    let result1 = filterData(data, keys, values, "selected_models", selected_models);
     if (result1.length === 0) {
         $("#"+scenario).hide();
         //console.log(scenario +" is getting hidden")
@@ -144,7 +145,9 @@ scenarios.forEach(function(scenario) {
     }
 
     values = [scenario, system2, sysversion2];
-    let result2 = filterData(data, keys, values);
+    let result2 = filterDataFromValues(data, "Model", selected_models);
+    //console.log(result1);
+    //console.log(result2);
     if (result2.length === 0) {
         $("#"+scenario).hide();
         //console.log(scenario +" is getting hidden")
