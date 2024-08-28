@@ -594,6 +594,7 @@ function constructOpenTableModel(model, category, with_power, availability, myda
 }
 function constructOpenTable(category, division, with_power, availability, data) {
     // var accuracyMatrix = ``;
+    console.log(accuracyUnits)
     models = []
     if (category == "datacenter") {
         models = models_datacenter;
@@ -605,18 +606,15 @@ function constructOpenTable(category, division, with_power, availability, data) 
     models.forEach(function(model, index) {
         html += constructOpenTableModel(model, category, with_power, availability, data);
         if (category === "datacenter" && division === "open") {
-            accuracy_matrices.forEach(function(matrix) {
-                // get the accuracy matrix from common.json(currently, the first matric is only utilised)
-                if (matrix.hasOwnProperty(model)) {
-                    let accuracyMetric = matrix[model][0];
-                    let resultTmp = filterForAccvsPerfPlot(data, model, category, division, accuracyMetric);
-                    if (resultTmp.length !== 0) {
-                        html += `
-                           <div id="AccVsPerfScatterPlot_${model}_${division}_${category}" style="height: 370px; width: 100%;"></div>
-    `                   ;
-                    }
+            if (accuracyUnits.hasOwnProperty(model)) {
+                let accuracyMetric = accuracyUnits[model].split(",")[0].trim();
+                let resultTmp = filterForAccvsPerfPlot(data, model, category, division, accuracyMetric);
+                if (resultTmp.length !== 0) {
+                    html += `
+                       <div id="AccVsPerfScatterPlot_${model}_${division}_${category}" style="height: 370px; width: 100%;"></div>
+`                   ;
                 }
-            });
+            }
             
         }
         
@@ -640,12 +638,10 @@ function drawAccvsPerfPlot(category, division, with_power, availability, data) {
     }
     models.forEach(function(model, index) {
         let accuracyMetric = ``;
-        accuracy_matrices.forEach(function(matrix) {
-            // get the accuracy matrix from common.json(currently, the first metric is only utilised)
-            if (matrix.hasOwnProperty(model)) {
-                accuracyMetric = matrix[model][0];
-            }
-        });
+        // Currently the first accuracy matrix is used to construct the scatter plot
+        if (accuracyUnits.hasOwnProperty(model)) {
+            accuracyMetric = accuracyUnits[model].split(",")[0].trim();
+        }
         if (category === "datacenter" && division === "open") {
             let filteredData = filterForAccvsPerfPlot(data, model, category, division, accuracyMetric);
             if (filteredData.length !== 0) {

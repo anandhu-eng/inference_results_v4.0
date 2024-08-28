@@ -9,23 +9,6 @@ models_datacenter = [ "llama2-70b-99", "llama2-70b-99.9", "gptj-99", "gptj-99.9"
 
 models_edge = [ "gptj-99", "gptj-99.9", "bert-99", "stable-diffusion-xl", "retinanet", "resnet", "3d-unet-99", "3d-unet-99.9", "rnnt"];
 
-var accuracy_matrices = [
-    { "gptj-99": ["ROUGE1", "ROUGE2", "ROUGEL"] },
-    { "gptj-99.9": ["ROUGE1", "ROUGE2", "ROUGEL"] },
-    { "bert-99": ["F1"] },
-    { "bert-99.9": ["F1"] },
-    { "stable-diffusion-xl": ["CLIP_SCORE", "FID_SCORE"] },
-    { "retinanet": ["mAP"] },
-    { "resnet": ["acc"] },
-    { "3d-unet-99": ["DICE"] },
-    { "3d-unet-99.9": ["DICE"] },
-    { "rnnt": ["WER"] },
-    { "llama2-70b-99": ["ROUGE1", "ROUGE2", "ROUGEL", "TOKENS_PER_SAMPLE"] },
-    { "llama2-70b-99.9": ["ROUGE1", "ROUGE2", "ROUGEL", "TOKENS_PER_SAMPLE"] },
-    { "dlrm-v2-99": [ "AUC" ] },
-    { "dlrm-v2-99.9": [ "AUC" ] }
-];
-
 const dbName = "mlperf_inference";
 const dbVersion = 4;
 const objStore = "inference_results";
