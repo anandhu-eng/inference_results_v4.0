@@ -1,0 +1,1416 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../top_results/">
+      
+      
+      <link rel="icon" href="../img/logo_v2.svg">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.33">
+    
+    
+      
+        <title>Compare - MLPerf Inference Results Comparison</title>
+      
+    
+    
+  
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+<link rel="stylesheet" rel="preload" as="style" media="all" href="thirdparty/tablesorter/dist/css/jquery.tablesorter.pager.min.css">
+<link rel="stylesheet" rel="preload" as="style" media="all" href="thirdparty/tablesorter/dist/css/theme.blackice.min.css">
+<link rel="stylesheet" rel="preload" as="style" media="all" href="thirdparty/tablesorter/dist/css/theme.blue.min.css">
+<style type="text/css">
+
+table.resultstable, table.counttable {
+    overflow-x: auto;
+}
+
+.pager1{
+    display: none!important;
+}
+
+.pagerSavedHeightSpacer {
+    display: none!important;
+}
+.resultstable_wrapper, .counttable_wrapper {
+    overflow-x: auto;
+}
+
+/* General form styling */
+form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for form group */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Label styling */
+label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+/* Select styling */
+select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: none;
+    appearance: none;
+    transition: border-color 0.3s ease;
+}
+
+select:focus {
+    border-color: #6200ee;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom arrow for select */
+select::-ms-expand {
+    display: none;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #333;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+/* Button styling */
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #6200ee;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #3700b3;
+}
+
+button:active {
+    background-color: #6200ee;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Input and button ripple effect */
+.button-ripple, .input-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.button-ripple::after, .input-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.5s ease, opacity 1s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.button-ripple:active::after, .input-ripple:focus::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    transition: 0s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    form {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    button {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    select {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    form {
+        padding: 10px;
+    }
+
+    button {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    select {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    label {
+        font-size: 13px;
+    }
+}
+
+select.pagesize, select.gotoPage {
+    width: fit-content;
+    padding: 5px;
+}
+
+
+/*Testing*/
+/* Base Table Styles */
+#results_table {
+    margin: 20px 0;
+    overflow-x: auto;
+}
+
+.tablesorter {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    font-size: 14px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Header and Footer Styles */
+.tablesorter thead th,
+.tablesorter tfoot th {
+    background-color: #6200ea; /* Material Design Purple */
+    color: #ffffff;
+    padding: 12px;
+    text-align: left;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-bottom: 2px solid #512da8; /* Darker purple for bottom border */
+}
+
+.tablesorter tfoot th {
+    background-color: #6200ea;
+}
+
+/* Body Row Styles */
+.tablesorter tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.3s ease;
+}
+
+.tablesorter tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.tablesorter tbody tr:hover {
+    background-color: #eeeeee;
+}
+
+.tablesorter tbody td {
+    padding: 12px;
+    text-align: left;
+    color: #424242;
+}
+
+/* Specific Column Styles */
+#col-id,
+#col-system,
+#col-submitter,
+#col-accelerator {
+    font-weight: bold;
+}
+#col-id, .col-id {
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
+    left: 0px;
+}
+td.col-result {
+    min-width: 100px;
+    text-align: right!important;
+}
+td.col-system, th.col-system {
+    min-width: 150px;
+    max-width: 150px;
+    width: 150px;
+    word-break: break-word;
+    left: 80px;
+}
+td.col-submitter, th.col-submitter {
+    min-width: 120px;
+    max-width: 120px;
+    width: 120px;
+    word-break: break-word;
+    left: 230px;
+}
+td.col-accelerator, th.col-accelerator {
+    min-width: 120px;
+    max-width: 120px;
+    width: 120px;
+    word-break: break-word;
+    left: 350px;
+}
+
+td.count-submitter, th.count-submitter {
+    min-width: 150px;
+    max-width: 150px;
+    width: 150px;
+    left: 0px;
+    background: white;
+    font-weight: 600;
+    font-size: Large;
+    word-break: break-word;
+    position:sticky;
+}
+.col-scenario {
+    font-weight: 500;
+    color: #6200ea;
+    text-align: center;
+}
+
+.col-result {
+    text-align: right;
+    color: #303f9f; /* Material Design Blue */
+    font-weight: 600;
+}
+
+.headcol {
+  position: sticky;
+  background:white;
+  border:none!important;
+}
+
+.collapsible {
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+}
+
+.chart {
+    /* padding: 0 18px; */
+    display: none; /* Hidden by default */
+    overflow: hidden;
+    height: 500px;
+    width: 100%;
+    background-color: white;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tablesorter thead,
+    .tablesorter tfoot {
+        display: none;
+    }
+
+    .tablesorter tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    .tablesorter tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        text-align: right;
+    }
+
+    .tablesorter tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #6200ea;
+        text-transform: uppercase;
+    }
+
+    .tablesorter tbody td:first-child {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+    .tablesorter tbody td:last-child {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+}
+
+
+
+</style>
+
+  <!-- Add scripts that need to run afterwards here -->
+
+    
+  
+      
+    
+<!-- load jQuery and tablesorter scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+
+<script type="text/javascript" src="thirdparty/tablesorter/dist/js/jquery.tablesorter.js"></script>
+<!-- tablesorter widgets (optional) -->
+
+<script type="text/javascript" src="thirdparty/tablesorter/dist/js/jquery.tablesorter.widgets.js"></script>
+<script type="text/javascript" src="thirdparty/tablesorter/dist/js/extras/jquery.tablesorter.pager.min.js"></script>
+  <!-- Add scripts that need to run before here -->
+  <script src="https://cdn.canvasjs.com/ga/jquery.canvasjs.min.js"></script>
+  
+<script type="text/javascript" src="javascripts/common.js"></script>
+  <!-- Add scripts that need to run afterwards here -->
+
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="yellow">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="MLPerf Inference Results Comparison" class="md-header__button md-logo" aria-label="MLPerf Inference Results Comparison" data-md-component="logo">
+      
+  <img src="../img/logo_v2.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MLPerf Inference Results Comparison
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Compare
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mlcommons/inference_results_v4.0" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Results
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+    
+  
+  Compare
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../top_results/" class="md-tabs__link">
+        
+  
+    
+  
+  Top Results
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="MLPerf Inference Results Comparison" class="md-nav__button md-logo" aria-label="MLPerf Inference Results Comparison" data-md-component="logo">
+      
+  <img src="../img/logo_v2.svg" alt="logo">
+
+    </a>
+    MLPerf Inference Results Comparison
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mlcommons/inference_results_v4.0" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Results
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Compare
+  </span>
+  
+
+      </a>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../top_results/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Top Results
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Compare</h1>
+
+<html>
+
+
+        <script type='text/javascript'>
+        var data1 = {}, data2 = {}, draw_power = {}, draw_power_efficiency = {}, ytitle = {}, sortcolumnindex, perfsortorder;
+        </script>
+
+
+        <script type='text/javascript'>
+        data1['Offline'] = 'v4.0: ESC8000_E11P_H100x8_TRT', data2['Offline'] = 'v4.0: ESC8000_E11_L40Sx8_TRT', draw_power['Offline'] = false, draw_power_efficiency['Offline'] = false, is_power = false,
+        ytitle['Offline'] = 'Samples per Second',
+        sortcolumnindex = 4, perfsortorder = 1;
+        </script>
+        <div id="Offline" > <h3 id="table_header_Offline">Comparing Offline scenario for v4.0: ESC8000_E11P_H100x8_TRT and v4.0: ESC8000_E11_L40Sx8_TRT</h3>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+        <div id="results_table_Offline"> <table class="tablesorter" id="results_Offline"><thead> <tr>
+        <th>Model</th>
+        <th>v4.0: ESC8000_E11P_H100x8_TRT</th>
+        <th>v4.0: ESC8000_E11_L40Sx8_TRT</th>
+        <th>Performance Delta</th></tr></thead><tr><td class='model'>3d-unet-99</td><td class='col-result'>37.2</td><td class='col-result'>31.1</td><td class='col-result'>-19.6%</td></tr><tr><td class='model'>3d-unet-99.9</td><td class='col-result'>37.2</td><td class='col-result'>31.1</td><td class='col-result'>-19.6%</td></tr><tr><td class='model'>bert-99</td><td class='col-result'>45227.2</td><td class='col-result'>26077.4</td><td class='col-result'>-73.4%</td></tr><tr><td class='model'>bert-99.9</td><td class='col-result'>38577.4</td><td class='col-result'>13709.5</td><td class='col-result'>-181.4%</td></tr><tr><td class='model'>dlrm-v2-99</td><td class='col-result'>336637.0</td><td class='col-result'>196999.0</td><td class='col-result'>-70.9%</td></tr><tr><td class='model'>dlrm-v2-99.9</td><td class='col-result'>201726.0</td><td class='col-result'>101691.0</td><td class='col-result'>-98.4%</td></tr><tr><td class='model'>resnet</td><td class='col-result'>445908.0</td><td class='col-result'>369341.0</td><td class='col-result'>-20.7%</td></tr><tr><td class='model'>retinanet</td><td class='col-result'>9286.4</td><td class='col-result'>6401.1</td><td class='col-result'>-45.1%</td></tr><tr><td class='model'>rnnt</td><td class='col-result'>124636.0</td><td class='col-result'>91782.0</td><td class='col-result'>-35.8%</td></tr><tr><td class='model'>stable-diffusion-xl</td><td class='col-result'>8.7</td><td class='col-result'>5.0</td><td class='col-result'>-74.0%</td></tr></table></div>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+
+            <div id="chartContainerOffline1" class="bgtext" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary"  id="printChartOffline1">Download</button>
+
+            <div id="chartContainerOffline2" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartOffline2">Download</button>
+            <div id="chartContainerOffline3" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartOffline3">Download</button>
+
+        <hr>
+        </div>
+
+
+        <script type='text/javascript'>
+        data1['Server'] = 'v4.0: ESC8000_E11P_H100x8_TRT', data2['Server'] = 'v4.0: ESC8000_E11_L40Sx8_TRT', draw_power['Server'] = false, draw_power_efficiency['Server'] = false, is_power = false,
+        ytitle['Server'] = 'Samples per Second',
+        sortcolumnindex = 4, perfsortorder = 1;
+        </script>
+        <div id="Server" > <h3 id="table_header_Server">Comparing Server scenario for v4.0: ESC8000_E11P_H100x8_TRT and v4.0: ESC8000_E11_L40Sx8_TRT</h3>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+        <div id="results_table_Server"> <table class="tablesorter" id="results_Server"><thead> <tr>
+        <th>Model</th>
+        <th>v4.0: ESC8000_E11P_H100x8_TRT</th>
+        <th>v4.0: ESC8000_E11_L40Sx8_TRT</th>
+        <th>Performance Delta</th></tr></thead><tr><td class='model'>bert-99</td><td class='col-result'>35349.5</td><td class='col-result'>25120.8</td><td class='col-result'>-40.7%</td></tr><tr><td class='model'>bert-99.9</td><td class='col-result'>31993.0</td><td class='col-result'>11995.1</td><td class='col-result'>-166.7%</td></tr><tr><td class='model'>dlrm-v2-99</td><td class='col-result'>279993.0</td><td class='col-result'>179985.0</td><td class='col-result'>-55.6%</td></tr><tr><td class='model'>dlrm-v2-99.9</td><td class='col-result'>199999.0</td><td class='col-result'>94969.0</td><td class='col-result'>-110.6%</td></tr><tr><td class='model'>resnet</td><td class='col-result'>368024.0</td><td class='col-result'>355029.0</td><td class='col-result'>-3.7%</td></tr><tr><td class='model'>retinanet</td><td class='col-result'>8394.3</td><td class='col-result'>5797.6</td><td class='col-result'>-44.8%</td></tr><tr><td class='model'>rnnt</td><td class='col-result'>99973.3</td><td class='col-result'>87974.4</td><td class='col-result'>-13.6%</td></tr><tr><td class='model'>stable-diffusion-xl</td><td class='col-result'>7.9</td><td class='col-result'>5.0</td><td class='col-result'>-58.0%</td></tr></table></div>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+
+            <div id="chartContainerServer1" class="bgtext" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary"  id="printChartServer1">Download</button>
+
+            <div id="chartContainerServer2" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartServer2">Download</button>
+            <div id="chartContainerServer3" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartServer3">Download</button>
+
+        <hr>
+        </div>
+
+
+        <script type='text/javascript'>
+        data1['SingleStream'] = 'v4.0: ESC8000_E11P_H100x8_TRT', data2['SingleStream'] = 'v4.0: ESC8000_E11_L40Sx8_TRT', draw_power['SingleStream'] = false, draw_power_efficiency['SingleStream'] = false, is_power = false,
+        ytitle['SingleStream'] = 'Latency per sample in milliseconds',
+        sortcolumnindex = 4, perfsortorder = 1;
+        </script>
+        <div id="SingleStream" style="display:none"
+            > <h3 id="table_header_SingleStream">Comparing SingleStream scenario for v4.0: ESC8000_E11P_H100x8_TRT and v4.0: ESC8000_E11_L40Sx8_TRT</h3>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+        <div id="results_table_SingleStream"> <table class="tablesorter" id="results_SingleStream"><thead> <tr>
+        <th>Model</th>
+        <th>v4.0: ESC8000_E11P_H100x8_TRT</th>
+        <th>v4.0: ESC8000_E11_L40Sx8_TRT</th>
+        <th>Performance Delta</th></tr></thead></table></div>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+
+            <div id="chartContainerSingleStream1" class="bgtext" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary"  id="printChartSingleStream1">Download</button>
+
+            <div id="chartContainerSingleStream2" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartSingleStream2">Download</button>
+            <div id="chartContainerSingleStream3" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartSingleStream3">Download</button>
+
+        <hr>
+        </div>
+
+
+        <script type='text/javascript'>
+        data1['MultiStream'] = 'v4.0: ESC8000_E11P_H100x8_TRT', data2['MultiStream'] = 'v4.0: ESC8000_E11_L40Sx8_TRT', draw_power['MultiStream'] = false, draw_power_efficiency['MultiStream'] = false, is_power = false,
+        ytitle['MultiStream'] = 'Latency per query of 8 samples in milliseconds',
+        sortcolumnindex = 4, perfsortorder = 1;
+        </script>
+        <div id="MultiStream" style="display:none"
+            > <h3 id="table_header_MultiStream">Comparing MultiStream scenario for v4.0: ESC8000_E11P_H100x8_TRT and v4.0: ESC8000_E11_L40Sx8_TRT</h3>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+        <div id="results_table_MultiStream"> <table class="tablesorter" id="results_MultiStream"><thead> <tr>
+        <th>Model</th>
+        <th>v4.0: ESC8000_E11P_H100x8_TRT</th>
+        <th>v4.0: ESC8000_E11_L40Sx8_TRT</th>
+        <th>Performance Delta</th></tr></thead></table></div>
+            <!-- pager -->
+            <div class="pager1">
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
+            <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/next.png" class="next"/>
+            <img src="https://mottie.github.io/tablesorter/addons/pager/icons/last.png" class="last"/>
+            <select class="pagesize" title="Select page size">
+            <option selected="selected" value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="all">All</option>
+            </select>
+            <select class="gotoPage" title="Select page number"></select>
+            </div>
+
+            <div id="chartContainerMultiStream1" class="bgtext" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary"  id="printChartMultiStream1">Download</button>
+
+            <div id="chartContainerMultiStream2" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartMultiStream2">Download</button>
+            <div id="chartContainerMultiStream3" class="bgtext power-content" style="height: 370px; width: 100%;"></div>
+            <button class="btn btn-primary power-content"  id="printChartMultiStream3">Download</button>
+
+        <hr>
+        </div>
+
+<script type="text/javascript" src="javascripts/compare_results_charts.js">
+</script>
+<script type="text/javascript" src="javascripts/compare_results.js">
+</script>
+
+<script type="text/javascript" src="javascripts/tablesorter.js">
+</script>
+
+    <form id="compareform"  method="post" action="">
+        <h3>Compare Results</h3>
+
+        <div class="form-field">
+            <label for="system1">System 1</label>
+            <select id="system1" name="system1" class="col">
+                <option value='0' >ESC8000_E11P_H100x8_TRT</option>
+<option value='1' >ESC8000_E11_L40Sx8_TRT</option>
+<option value='2' >ESC8000_E11_L4x8_TRT</option>
+<option value='3' >NC_H100_v5_TRT</option>
+<option value='4' >Cirrascale_4xQAIC_AI_100-kilt-qaic-glow-vdefault-default_config</option>
+<option value='5' >GATEOverflow_Intel_Saphhire_Rapids-intel-cpu-pytorch-vdefault-default_config</option>
+<option value='6' >aws_dl2q.24xlarge-kilt-qaic-glow-vdefault-default_config</option>
+<option value='7' >GATE_Overflow_Intel_Sapphire_Rapids-nvidia_original-gpu-tensorrt-vdefault-default_config</option>
+<option value='8' >GATE_Overflow_Intel_Sapphire_Rapids-cpp-cpu-onnxruntime-vdefault-default_config</option>
+<option value='9' >GATE_Overflow_Intel_Sapphire_Rapids-cpp-gpu-onnxruntime-vdefault-default_config</option>
+<option value='10' >GATE_Overflow_Intel_Sapphire_Rapids-reference-gpu-pytorch-v2.1.2-default_config</option>
+<option value='11' >PCSPECIALIST_AMD_AM5_PC-reference-cpu-onnxruntime-v1.15.1-default_config</option>
+<option value='12' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-nvidia_original-gpu-tensorrt-vdefault-default_config</option>
+<option value='13' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-cpu-pytorch-v2.1.0-default_config</option>
+<option value='14' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-onnxruntime-v1.16.3-default_config</option>
+<option value='15' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-pytorch-v2.1.0-default_config</option>
+<option value='16' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-tf-v2.13.0-default_config</option>
+<option value='17' >PCSPECIALIST_AMD_AM5_with_Nvidia_RTX_4090-cpp-cpu-onnxruntime-vdefault-default_config</option>
+<option value='18' >PCSPECIALIST_AMD_AM5_with_Nvidia_RTX_4090-cpp-gpu-onnxruntime-vdefault-default_config</option>
+<option value='19' >PCSPECIALIST_AMD_AM5_with_Nvidia_RTX_4090-reference-gpu-pytorch-v2.1.2-default_config</option>
+<option value='20' >Thundercomm_RB6-kilt-qaic-glow-vdefault-default_config</option>
+<option value='21' >1-node-2S-C240M7-EMR-PyTorch-INT4</option>
+<option value='22' >1-node-2S-C240M7-EMR-PyTorch-INT8</option>
+<option value='23' >1-node-2S-C240M7-EMR-PyTorch-MIX</option>
+<option value='24' >R750xa_A100_PCIe_80GBx4_TRT</option>
+<option value='25' >R760_CPU</option>
+<option value='26' >R760_L40Sx2_TRT</option>
+<option value='27' >R760xa_L40Sx4_TRT</option>
+<option value='28' >R7615_L40Sx2_TRT</option>
+<option value='29' >XE8640_H100_SXM_80GBx4_TRT</option>
+<option value='30' >XE9640_H100_SXM_80GBX4_TRT</option>
+<option value='31' >XE9680_H100_SXM_80GBx8_TRT</option>
+<option value='32' >XE9680_H100_SXM_80GBx8_TRT_MaxQ</option>
+<option value='33' >XE9680_IntelXeon8480_NVIDIA_H100_SXM_80GBx8_TRT</option>
+<option value='34' >vR760_L40S_48Cx2_TRT</option>
+<option value='35' >XR7620_L4x1_TRT</option>
+<option value='36' >XR8620_L4x1_MaxQ_TRT_MaxQ</option>
+<option value='37' >XR8620_L4x1_TRT</option>
+<option value='38' >CDI_L40Sx16_TRT</option>
+<option value='39' >CDI_L40Sx8_MaxP_TRT</option>
+<option value='40' >CDI_L40Sx8_TRT</option>
+<option value='41' >GX2560M7_H100_SXM_80GBx4_TRT</option>
+<option value='42' >GIGABYTE-G593-SD1_DGX-H100_H100-SXM-80GBx8_TRT</option>
+<option value='43' >H100-SXM-80GBx8_TRT</option>
+<option value='44' >tpu_v5e_x4</option>
+<option value='45' >HPE_Cray_XD670_H100_SXM_80GBx8_TRT_TRT</option>
+<option value='46' >HPE_ProLiant_DL380a_H100_PCIe_80GBx4_TRT_TRT</option>
+<option value='47' >HPE_ProLiant_DL380a_L40S_PCIe_48GBx4_TRT</option>
+<option value='48' >1-node-2S-EMR-ITREX</option>
+<option value='49' >1-node-2S-EMR-PyTorch</option>
+<option value='50' >1-node-2S-EMR-PyTorch-BF16</option>
+<option value='51' >HLS-Gaudi2-PT</option>
+<option value='52' >g292_q16_pro_pp</option>
+<option value='53' >SE455_L40x2_TRT</option>
+<option value='54' >SE360_L4x1_TRT</option>
+<option value='55' >SE450_L40x2_TRT</option>
+<option value='56' >DGX-H100_H100-SXM-80GBx1_TRT</option>
+<option value='57' >DGX-H100_H100-SXM-80GBx2_TRT</option>
+<option value='58' >DGX-H100_H100-SXM-80GBx8_TRT</option>
+<option value='59' >DGX-H100_H100-SXM-80GBx8_TRT_MaxQ</option>
+<option value='60' >GH200-GraceHopper-Superchip_GH200-96GB_aarch64x1_TRT</option>
+<option value='61' >H100-NVL-94GBx8_TRT</option>
+<option value='62' >L40Sx8_TRT</option>
+<option value='63' >Orin_TRT</option>
+<option value='64' >OCI-H100_H100-SXM-80GBx8_TRT</option>
+<option value='65' >r282_q8_pro_edge</option>
+<option value='66' >D54U_3U_H100_PCIe_80GBx4_TRT</option>
+<option value='67' >D54U_3U_L40S_PCIe_48GBx4_TRT</option>
+<option value='68' >davinci_hhhl</option>
+<option value='69' >1-node-2S-EMR-PyTorch-INT8</option>
+<option value='70' >SYS-521GE-TNRT_L40S_PCIe_48GBx8_TRT</option>
+<option value='71' >SYS_821GE_TNHR_H100_SXM_80GBx8_TRT</option>
+<option value='72' >1-node-1S-EMR-PyTorch</option>
+<option value='73' >ES200G2_L40Sx2_TRT</option>
+<option value='74' >r760_q4_ultra</option>
+<option value='75' >dl380_q8_ultra</option>
+<option value='76' >sr670_q4_ultra</option>
+<option value='77' >GH200-GraceHopper-Superchip_GH200-144GB_aarch64x1_TRT</option>
+<option value='78' >H200-SXM-141GB-CTSx1_TRT</option>
+<option value='79' >H200-SXM-141GB-CTSx8_TRT</option>
+<option value='80' >H200-SXM-141GBx1_TRT</option>
+<option value='81' >H200-SXM-141GBx8_TRT</option>
+<option value='82' >g293_q16_ultra_ee</option>
+<option value='83' >g293_q16_ultra_pp</option>
+<option value='84' >r282_q2_ultra_ee</option>
+<option value='85' >r282_q2_ultra_pp</option>
+<option value='86' >dl385_q8_std</option>
+<option value='87' >GATE_Overflow_Intel_Sapphire_Rapids-reference-gpu-pytorch-v2.1.1-default_config</option>
+<option value='88' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-cpu-pytorch-v2.2.0-network_loadgen</option>
+<option value='89' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-onnxruntime-v1.16.3-network_loadgen</option>
+<option value='90' >arjun_spr-reference-cpu-pytorch-v2.1.0-default_config</option>
+<option value='91' >AWS_dl2q.24xlarge-kilt-qaic-glow-vdefault-default_config</option>
+<option value='92' >GATE_Overflow_Intel_Sapphire_Rapids-intel-cpu-pytorch-vdefault-default_config</option>
+<option value='93' >AMD_Mini_PC-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='94' >AMD_Mini_PC-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='95' >AMD_Mini_PC-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='96' >GATE_Overflow_Intel_Sapphire_Rapids-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='97' >GATE_Overflow_Intel_Sapphire_Rapids-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='98' >GATE_Overflow_Intel_Sapphire_Rapids-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='99' >LENOVO_P14S_GEN_4_WINDOWS_11-reference-cpu-onnxruntime-v1.16.0-default_config</option>
+<option value='100' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon</option>
+<option value='101' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon_with_live_preprocessing</option>
+<option value='102' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='103' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='104' >Nvidia_Jetson_Orin_AGX-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='105' >Nvidia_Jetson_Orin_AGX-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='106' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='107' >Raspberry_Pi_4-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon</option>
+<option value='108' >Raspberry_Pi_4-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon_with_live_preprocessing</option>
+<option value='109' >Raspberry_Pi_4-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='110' >Raspberry_Pi_4-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='111' >Tejasvis_MBP-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='112' >a1.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='113' >a1.4xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='114' >a1.metal-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='115' >a1.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='116' >aws_c5.2xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='117' >aws_c5.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='118' >aws_c5.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='119' >aws_c5.xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='120' >aws_c5.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='121' >aws_c5.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='122' >c5a.2xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='123' >c5a.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='124' >c5a.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='125' >c5a.xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='126' >c5a.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='127' >c5a.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='128' >macbook_pro_m1_2-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='129' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon</option>
+<option value='130' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon_with_live_preprocessing</option>
+<option value='131' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='132' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='133' >macbook_pro_m1_2-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='134' >macbook_pro_m1_2-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='135' >t2.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='136' >t2.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='137' >t2.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='138' >t2.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='139' >t3.2xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='140' >t3.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='141' >t3.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='142' >t3.xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='143' >t3.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='144' >t3.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='145' >t4g.2xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='146' >t4g.2xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='147' >t4g.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='148' >t4g.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='149' >t4g.xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='150' >t4g.xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='151' >t4g.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='152' >t4g.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='153' >A100-2N-80GB</option>
+<option value='154' >H100-2N-80GB</option>
+<option value='155' >DGX-H100_H100-SXM-80GBx1_TRT_DEEP_CACHE</option>
+<option value='156' >DGX-H100_H100-SXM-80GBx1_TRT_DEEP_CACHE_PRUNED</option>
+<option value='157' >DGX-H100_H100-SXM-80GBx1_TRT_PRUNED</option>
+<option value='158' >DGX-H100_H100-SXM-80GBx8_TRT_SPARSE</option>
+<option value='159' >DGX-RedHat-OpenShift</option>
+<option value='160' >AS-4125GS-TNRT-RedHat-OpenShift-AI</option>
+
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="system2">System 2</label>
+            <select id="system2" name="system2" class="col">
+                <option value='0' >ESC8000_E11P_H100x8_TRT</option>
+<option value='1' >ESC8000_E11_L40Sx8_TRT</option>
+<option value='2' >ESC8000_E11_L4x8_TRT</option>
+<option value='3' >NC_H100_v5_TRT</option>
+<option value='4' >Cirrascale_4xQAIC_AI_100-kilt-qaic-glow-vdefault-default_config</option>
+<option value='5' >GATEOverflow_Intel_Saphhire_Rapids-intel-cpu-pytorch-vdefault-default_config</option>
+<option value='6' >aws_dl2q.24xlarge-kilt-qaic-glow-vdefault-default_config</option>
+<option value='7' >GATE_Overflow_Intel_Sapphire_Rapids-nvidia_original-gpu-tensorrt-vdefault-default_config</option>
+<option value='8' >GATE_Overflow_Intel_Sapphire_Rapids-cpp-cpu-onnxruntime-vdefault-default_config</option>
+<option value='9' >GATE_Overflow_Intel_Sapphire_Rapids-cpp-gpu-onnxruntime-vdefault-default_config</option>
+<option value='10' >GATE_Overflow_Intel_Sapphire_Rapids-reference-gpu-pytorch-v2.1.2-default_config</option>
+<option value='11' >PCSPECIALIST_AMD_AM5_PC-reference-cpu-onnxruntime-v1.15.1-default_config</option>
+<option value='12' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-nvidia_original-gpu-tensorrt-vdefault-default_config</option>
+<option value='13' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-cpu-pytorch-v2.1.0-default_config</option>
+<option value='14' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-onnxruntime-v1.16.3-default_config</option>
+<option value='15' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-pytorch-v2.1.0-default_config</option>
+<option value='16' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-tf-v2.13.0-default_config</option>
+<option value='17' >PCSPECIALIST_AMD_AM5_with_Nvidia_RTX_4090-cpp-cpu-onnxruntime-vdefault-default_config</option>
+<option value='18' >PCSPECIALIST_AMD_AM5_with_Nvidia_RTX_4090-cpp-gpu-onnxruntime-vdefault-default_config</option>
+<option value='19' >PCSPECIALIST_AMD_AM5_with_Nvidia_RTX_4090-reference-gpu-pytorch-v2.1.2-default_config</option>
+<option value='20' >Thundercomm_RB6-kilt-qaic-glow-vdefault-default_config</option>
+<option value='21' >1-node-2S-C240M7-EMR-PyTorch-INT4</option>
+<option value='22' >1-node-2S-C240M7-EMR-PyTorch-INT8</option>
+<option value='23' >1-node-2S-C240M7-EMR-PyTorch-MIX</option>
+<option value='24' >R750xa_A100_PCIe_80GBx4_TRT</option>
+<option value='25' >R760_CPU</option>
+<option value='26' >R760_L40Sx2_TRT</option>
+<option value='27' >R760xa_L40Sx4_TRT</option>
+<option value='28' >R7615_L40Sx2_TRT</option>
+<option value='29' >XE8640_H100_SXM_80GBx4_TRT</option>
+<option value='30' >XE9640_H100_SXM_80GBX4_TRT</option>
+<option value='31' >XE9680_H100_SXM_80GBx8_TRT</option>
+<option value='32' >XE9680_H100_SXM_80GBx8_TRT_MaxQ</option>
+<option value='33' >XE9680_IntelXeon8480_NVIDIA_H100_SXM_80GBx8_TRT</option>
+<option value='34' >vR760_L40S_48Cx2_TRT</option>
+<option value='35' >XR7620_L4x1_TRT</option>
+<option value='36' >XR8620_L4x1_MaxQ_TRT_MaxQ</option>
+<option value='37' >XR8620_L4x1_TRT</option>
+<option value='38' >CDI_L40Sx16_TRT</option>
+<option value='39' >CDI_L40Sx8_MaxP_TRT</option>
+<option value='40' >CDI_L40Sx8_TRT</option>
+<option value='41' >GX2560M7_H100_SXM_80GBx4_TRT</option>
+<option value='42' >GIGABYTE-G593-SD1_DGX-H100_H100-SXM-80GBx8_TRT</option>
+<option value='43' >H100-SXM-80GBx8_TRT</option>
+<option value='44' >tpu_v5e_x4</option>
+<option value='45' >HPE_Cray_XD670_H100_SXM_80GBx8_TRT_TRT</option>
+<option value='46' >HPE_ProLiant_DL380a_H100_PCIe_80GBx4_TRT_TRT</option>
+<option value='47' >HPE_ProLiant_DL380a_L40S_PCIe_48GBx4_TRT</option>
+<option value='48' >1-node-2S-EMR-ITREX</option>
+<option value='49' >1-node-2S-EMR-PyTorch</option>
+<option value='50' >1-node-2S-EMR-PyTorch-BF16</option>
+<option value='51' >HLS-Gaudi2-PT</option>
+<option value='52' >g292_q16_pro_pp</option>
+<option value='53' >SE455_L40x2_TRT</option>
+<option value='54' >SE360_L4x1_TRT</option>
+<option value='55' >SE450_L40x2_TRT</option>
+<option value='56' >DGX-H100_H100-SXM-80GBx1_TRT</option>
+<option value='57' >DGX-H100_H100-SXM-80GBx2_TRT</option>
+<option value='58' >DGX-H100_H100-SXM-80GBx8_TRT</option>
+<option value='59' >DGX-H100_H100-SXM-80GBx8_TRT_MaxQ</option>
+<option value='60' >GH200-GraceHopper-Superchip_GH200-96GB_aarch64x1_TRT</option>
+<option value='61' >H100-NVL-94GBx8_TRT</option>
+<option value='62' >L40Sx8_TRT</option>
+<option value='63' >Orin_TRT</option>
+<option value='64' >OCI-H100_H100-SXM-80GBx8_TRT</option>
+<option value='65' >r282_q8_pro_edge</option>
+<option value='66' >D54U_3U_H100_PCIe_80GBx4_TRT</option>
+<option value='67' >D54U_3U_L40S_PCIe_48GBx4_TRT</option>
+<option value='68' >davinci_hhhl</option>
+<option value='69' >1-node-2S-EMR-PyTorch-INT8</option>
+<option value='70' >SYS-521GE-TNRT_L40S_PCIe_48GBx8_TRT</option>
+<option value='71' >SYS_821GE_TNHR_H100_SXM_80GBx8_TRT</option>
+<option value='72' >1-node-1S-EMR-PyTorch</option>
+<option value='73' >ES200G2_L40Sx2_TRT</option>
+<option value='74' >r760_q4_ultra</option>
+<option value='75' >dl380_q8_ultra</option>
+<option value='76' >sr670_q4_ultra</option>
+<option value='77' >GH200-GraceHopper-Superchip_GH200-144GB_aarch64x1_TRT</option>
+<option value='78' >H200-SXM-141GB-CTSx1_TRT</option>
+<option value='79' >H200-SXM-141GB-CTSx8_TRT</option>
+<option value='80' >H200-SXM-141GBx1_TRT</option>
+<option value='81' >H200-SXM-141GBx8_TRT</option>
+<option value='82' >g293_q16_ultra_ee</option>
+<option value='83' >g293_q16_ultra_pp</option>
+<option value='84' >r282_q2_ultra_ee</option>
+<option value='85' >r282_q2_ultra_pp</option>
+<option value='86' >dl385_q8_std</option>
+<option value='87' >GATE_Overflow_Intel_Sapphire_Rapids-reference-gpu-pytorch-v2.1.1-default_config</option>
+<option value='88' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-cpu-pytorch-v2.2.0-network_loadgen</option>
+<option value='89' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-gpu-onnxruntime-v1.16.3-network_loadgen</option>
+<option value='90' >arjun_spr-reference-cpu-pytorch-v2.1.0-default_config</option>
+<option value='91' >AWS_dl2q.24xlarge-kilt-qaic-glow-vdefault-default_config</option>
+<option value='92' >GATE_Overflow_Intel_Sapphire_Rapids-intel-cpu-pytorch-vdefault-default_config</option>
+<option value='93' >AMD_Mini_PC-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='94' >AMD_Mini_PC-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='95' >AMD_Mini_PC-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='96' >GATE_Overflow_Intel_Sapphire_Rapids-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='97' >GATE_Overflow_Intel_Sapphire_Rapids-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='98' >GATE_Overflow_Intel_Sapphire_Rapids-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='99' >LENOVO_P14S_GEN_4_WINDOWS_11-reference-cpu-onnxruntime-v1.16.0-default_config</option>
+<option value='100' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon</option>
+<option value='101' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon_with_live_preprocessing</option>
+<option value='102' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='103' >Nvidia_Jetson_Orin_AGX-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='104' >Nvidia_Jetson_Orin_AGX-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='105' >Nvidia_Jetson_Orin_AGX-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='106' >PCSPECIALIST_AMD_AM5_PC_with_Nvidia_RTX_4090-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='107' >Raspberry_Pi_4-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon</option>
+<option value='108' >Raspberry_Pi_4-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon_with_live_preprocessing</option>
+<option value='109' >Raspberry_Pi_4-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='110' >Raspberry_Pi_4-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='111' >Tejasvis_MBP-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='112' >a1.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='113' >a1.4xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='114' >a1.metal-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='115' >a1.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='116' >aws_c5.2xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='117' >aws_c5.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='118' >aws_c5.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='119' >aws_c5.xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='120' >aws_c5.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='121' >aws_c5.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='122' >c5a.2xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='123' >c5a.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='124' >c5a.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='125' >c5a.xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='126' >c5a.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='127' >c5a.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='128' >macbook_pro_m1_2-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='129' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon</option>
+<option value='130' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.05-using_neon_with_live_preprocessing</option>
+<option value='131' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='132' >macbook_pro_m1_2-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='133' >macbook_pro_m1_2-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='134' >macbook_pro_m1_2-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='135' >t2.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='136' >t2.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='137' >t2.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='138' >t2.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='139' >t3.2xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='140' >t3.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='141' >t3.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='142' >t3.xlarge-reference-cpu-deepsparse-vdefault-default_config</option>
+<option value='143' >t3.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='144' >t3.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='145' >t4g.2xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='146' >t4g.2xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='147' >t4g.2xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='148' >t4g.2xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='149' >t4g.xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon</option>
+<option value='150' >t4g.xlarge-tflite_armnn_cpp-cpu-armnn_tflite-v23.11-using_neon_with_live_preprocessing</option>
+<option value='151' >t4g.xlarge-tflite_cpp-cpu-tflite-vmaster-default_config</option>
+<option value='152' >t4g.xlarge-tflite_cpp-cpu-tflite-vmaster-with_live_preprocessing</option>
+<option value='153' >A100-2N-80GB</option>
+<option value='154' >H100-2N-80GB</option>
+<option value='155' >DGX-H100_H100-SXM-80GBx1_TRT_DEEP_CACHE</option>
+<option value='156' >DGX-H100_H100-SXM-80GBx1_TRT_DEEP_CACHE_PRUNED</option>
+<option value='157' >DGX-H100_H100-SXM-80GBx1_TRT_PRUNED</option>
+<option value='158' >DGX-H100_H100-SXM-80GBx8_TRT_SPARSE</option>
+<option value='159' >DGX-RedHat-OpenShift</option>
+<option value='160' >AS-4125GS-TNRT-RedHat-OpenShift-AI</option>
+
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="models">Models</label>
+            <select id="models" name="models[]" class="col" multiple>
+                <option value='0' selected>All models</option>
+<option value='1' >3d-unet-99</option>
+<option value='2' >3d-unet-99.9</option>
+<option value='3' >bert-99</option>
+<option value='4' >bert-99.9</option>
+<option value='5' >dlrm-v2-99</option>
+<option value='6' >dlrm-v2-99.9</option>
+<option value='7' >resnet</option>
+<option value='8' >retinanet</option>
+<option value='9' >rnnt</option>
+<option value='10' >stable-diffusion-xl</option>
+<option value='11' >gptj-99</option>
+<option value='12' >gptj-99.9</option>
+<option value='13' >llama2-70b-99.9</option>
+<option value='14' >llama2-70b-99</option>
+
+            </select>
+        </div>
+
+        <div class="form-field">
+            <button type="submit" name="okthen" value="1" id="compare_results">Compare SUTs</button>
+        </div>
+    </form>
+
+</html>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link", "content.code.copy", "navigation.expand", "navigation.sections", "navigation.indexes", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.follow"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+  
+      <script src="../assets/javascripts/bundle.af256bd8.min.js"></script>
+      
+    
+  <script type"text/javascript">
+  var resort = true, // re-apply the current sort
+        callback = function() {
+          // do something after the updateAll method has completed
+        };
+
+      // let the plugin know that we made a update, then the plugin will
+      // automatically sort the table based on the header settings
+      $("table").trigger("updateAll", [ resort, callback ]);
+  </script>
+
+
+  </body>
+</html>
