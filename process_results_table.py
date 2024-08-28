@@ -9,7 +9,7 @@ with open('summary_results.json') as f:
 
 tableposhtml = """
 <!-- pager -->
-<div class="pager PAGER_CLASS">
+<div class="pager1 PAGER_CLASS">
             <img src="https://mottie.github.io/tablesorter/addons/pager/icons/first.png" class="first"/>
             <img src="https://mottie.github.io/tablesorter/addons/pager/icons/prev.png" class="prev"/>
             <span class="pagedisplay"></span> <!-- this can be any element, including an input -->
