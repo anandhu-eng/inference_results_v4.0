@@ -978,12 +978,30 @@ function filterForAccvsPerfPlot(processedData, modelName, category, division, ac
                 // Accuracy value for the specific accuracy matrix would be extracted through this function
                 const accuracyValue = parseFloat(extractAccuracyValue(accuracyValues, accuracyMetric));
                 console.log(typeof(accuracyValue));
+                let markerType;
+                switch (scenario) {
+                    case "Offline":
+                        markerType = "circle"; // Circle for Offline
+                        break;
+                    case "Server":
+                        markerType = "triangle"; // Square for Server
+                        break;
+                    case "SingleStream":
+                        markerType = "square"; // Triangle for Single Stream
+                        break;
+                    case "MultiStream":
+                        markerType = "cross"; // Cross for Multi Stream
+                        break;
+                    default:
+                        markerType = "circle"; // Default to circle if scenario is unknown
+                }
                 const details = {
                     x: scenarioData.Performance_Result,
                     y: accuracyValue,
                     Submitter: models.Submitter,
                     System: models.System,
-                    Scenario: scenario
+                    Scenario: scenario,
+                    markerType: markerType
                     // These are the keys that could be enabled if required in the future
                     // ID: myId,
                     // Model: modelName,
