@@ -123,3 +123,54 @@ function filterForAccvsPerfPlot(processedData, modelName, category, division, ac
 
     return result;
 }
+
+
+function constructChartFromSummary(data, category, division, with_power) {
+    const [summaryData, countData] = getSummaryData(data, category, division, with_power);
+
+    let html = "";
+    html += `
+        <div id="submittervssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
+        <div id="modelvssubmissionchartContainer" style="height: 370px; width: 100%;"></div>
+    `;
+
+    let submitterVsSubmissionsCntTmp = {};
+    let modelsVsSubmissionsCntTmp = {};
+
+    if ( category==="edge" ) {
+        models = models_edge;
+        //console.log("edgecategory");
+    }
+    else {
+        models = models_datacenter;
+        //console.log("datacenter");
+    }
+
+    // Loop for getting submitters vs number of submissions count
+    for (const [submitter, item] of Object.entries(countData)) {
+        let cnt = 0;
+        for (const m of models) {
+            if (item[m] !== undefined && item[m] !== '') {
+                cnt += item[m];
+                if (modelsVsSubmissionsCntTmp[m] === undefined) {
+                    modelsVsSubmissionsCntTmp[m] = item[m];
+                } else {
+                    modelsVsSubmissionsCntTmp[m] += item[m];
+                }
+            }
+        }
+        submitterVsSubmissionsCntTmp[submitter] = cnt;
+    }
+
+    submitterVsSubmissionsCnt = Object.entries(submitterVsSubmissionsCntTmp).map(([key, value]) => ({
+        label: key,
+        y: value
+    }));
+
+    modelsVsSubmissionsCnt = Object.entries(modelsVsSubmissionsCntTmp).map(([key, value]) => ({
+        label: key,
+        y: value
+    }));
+
+    drawChartResults();
+}
