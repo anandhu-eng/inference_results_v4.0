@@ -41,7 +41,7 @@ function drawAccvsPerfPlot(category, division, with_power, availability, data) {
                     },
                     data: [{
                       type: "scatter",
-                      toolTipContent: "<b>Submitter:</b> {Submitter}<br/><b>System:</b> {System}<br/><b>Scenario:</b> {Scenario}<br/><b>Performance:</b> {x}<br/><b>Accuracy:</b> {y}",
+                      toolTipContent: "<b>ID:</b> {ID}<br/><b>Submitter:</b> {Submitter}<br/><b>System:</b> {System}<br/><b>Scenario:</b> {Scenario}<br/><b>Performance:</b> {x}<br/><b>Accuracy:</b> {y}",
                       dataPoints: filteredData
                     }]
                   });
@@ -99,10 +99,10 @@ function filterForAccvsPerfPlot(processedData, modelName, category, division, ac
                     y: accuracyValue,
                     Submitter: models.Submitter,
                     System: models.System,
+                    markerType: markerType,
                     Scenario: scenario,
-                    markerType: markerType
+                    ID: myId
                     // These are the keys that could be enabled if required in the future
-                    // ID: myId,
                     // Model: modelName,
                     // // Scenario: scenario,
                     // // has_power: scenarioData.has_power,
